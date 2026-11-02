@@ -14,7 +14,8 @@ import {
 	Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
+import AddSoldierButton from "./addSoldierButton";
 
 const NavBar = () => {
 	const [isOpen, setIsOpen] = useState(false);
