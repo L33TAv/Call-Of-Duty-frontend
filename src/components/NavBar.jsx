@@ -108,7 +108,7 @@ const NavBar = () => {
 									<ListItemText primary="Duties" />
 								</ListItemButton>
 							</ListItem>
-            
+
 							<ListItem disablePadding>
 								<ListItemButton component={Link} to="/admin">
 									<ListItemText primary="Admin" />
