@@ -1,125 +1,138 @@
 import GpsFixedIcon from "@mui/icons-material/GpsFixed";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
-  AppBar,
-  Box,
-  Button,
-  Drawer,
-  IconButton,
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Toolbar,
-  Typography,
+	AppBar,
+	Box,
+	Button,
+	Divider,
+	Drawer,
+	IconButton,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemText,
+	Toolbar,
+	Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
+import AddSoldierButton from "./addSoldierButton";
 
 export default function NavBar() {
 	const [isOpen, setOpen] = useState(false);
+	const location = useLocation();
 
-  function handleDrawerToggle() {
-    setOpen(!isOpen);
-  }
+	const isSoldiersPage = location.pathname === "/soldiers";
 
-  return (
-    <AppBar position="sticky" color="primary" elevation={2}>
-      <Toolbar
-        sx={(theme) => ({
-          minHeight: "40px",
-          display: "flex",
-          justifyContent: "space-between",
+	function handleDrawerToggle() {
+		setOpen(!isOpen);
+	}
 
-          [theme.breakpoints.up("md")]: {
-            minHeight: { xs: "40px", md: "60px" },
-          },
-        })}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <GpsFixedIcon sx={{ display: { xs: "none", md: "block" } }} />
-          <Typography
-            variant="h6"
-            component="div"
-            noWrap
-            sx={{
-              flexGrow: {
-                xs: 1,
-                md: 0,
-              },
-              fontWeight: "Bold",
-              fontSize: {
-                xs: 17,
-                sm: 20,
-                md: 25,
-              },
-            }}
-          >
-            Call of duty
-          </Typography>
-        </Box>
+	return (
+		<AppBar position="sticky" color="primary" elevation={2}>
+			<Toolbar
+				sx={(theme) => ({
+					minHeight: "40px",
+					display: "flex",
+					justifyContent: "space-between",
 
-        <Box sx={{ display: "flex", flexDirection: "row" }}>
-          <Box sx={{ display: { xs: "none", md: "block" } }}>
-            <Button color="inherit" component={Link} to="/">
-              Home
-            </Button>
-            <Button color="inherit" component={Link} to="/soldiers">
-              Soldiers
-            </Button>
-            <Button color="inherit" component={Link} to="/duties">
-              Duties
-            </Button>
-            <Button color="inherit" component={Link} to="/admin">
-              Admin
-            </Button>
+					[theme.breakpoints.up("md")]: {
+						minHeight: { xs: "40px", md: "60px" },
+					},
+				})}
+			>
+				<Box
+					sx={{
+						display: "flex",
+						flexDirection: "row",
+						alignItems: "center",
+						gap: 1,
+					}}
+				>
+					<GpsFixedIcon sx={{ display: { xs: "none", md: "block" } }} />
+					<Typography
+						variant="h6"
+						component="div"
+						noWrap
+						sx={{
+							flexGrow: {
+								xs: 1,
+								md: 0,
+							},
+							fontWeight: "Bold",
+							fontSize: {
+								xs: 17,
+								sm: 20,
+								md: 25,
+							},
+						}}
+					>
+						Call of duty
+					</Typography>
+				</Box>
 
-          </Box>
-        </Box>
+				<Box sx={{ display: "flex", flexDirection: "row" }}>
+					<Box sx={{ display: { xs: "none", md: "block" } }}>
+						<Button color="inherit" component={Link} to="/">
+							Home
+						</Button>
+						<Button color="inherit" component={Link} to="/soldiers">
+							Soldiers
+						</Button>
+						<Button color="inherit" component={Link} to="/duties">
+							Duties
+						</Button>
+						<Button color="inherit" component={Link} to="/admin">
+							Admin
+						</Button>
 
-        <Box sx={{ display: { xs: "block", md: "none" } }}>
-          <IconButton color="inherit" onClick={handleDrawerToggle}>
-            <MenuIcon />
-          </IconButton>
-        </Box>
-        <Drawer anchor="right" open={isOpen} onClose={handleDrawerToggle}>
-          <Box onClick={handleDrawerToggle} sx={{ width: 200, pt: 2 }}>
-            <List>
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/">
-                  <ListItemText primary="Home" />
-                </ListItemButton>
-              </ListItem>
+						{isSoldiersPage && <AddSoldierButton />}
+					</Box>
+				</Box>
 
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/soldiers">
-                  <ListItemText primary="Soldiers" />
-                </ListItemButton>
-              </ListItem>
+				<Box sx={{ display: { xs: "block", md: "none" } }}>
+					<IconButton color="inherit" onClick={handleDrawerToggle}>
+						<MenuIcon />
+					</IconButton>
+				</Box>
+				<Drawer anchor="right" open={isOpen} onClose={handleDrawerToggle}>
+					<Box sx={{ width: 200, pt: 2 }}>
+						<List onClick={handleDrawerToggle}>
+							<ListItem disablePadding>
+								<ListItemButton component={Link} to="/">
+									<ListItemText primary="Home" />
+								</ListItemButton>
+							</ListItem>
 
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/duties">
-                  <ListItemText primary="Duties" />
-                </ListItemButton>
-              </ListItem>
+							<ListItem disablePadding>
+								<ListItemButton component={Link} to="/soldiers">
+									<ListItemText primary="Soldiers" />
+								</ListItemButton>
+							</ListItem>
 
-              <ListItem disablePadding>
-                <ListItemButton component={Link} to="/admin">
-                  <ListItemText primary="Admin" />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </Box>
-        </Drawer>
-      </Toolbar>
-    </AppBar>
-  );
+							<ListItem disablePadding>
+								<ListItemButton component={Link} to="/duties">
+									<ListItemText primary="Duties" />
+								</ListItemButton>
+							</ListItem>
+
+							<ListItem disablePadding>
+								<ListItemButton component={Link} to="/admin">
+									<ListItemText primary="Admin" />
+								</ListItemButton>
+							</ListItem>
+						</List>
+						{isSoldiersPage && (
+							<>
+								<Divider sx={{ my: 1.5 }} />
+								<Box>
+									<AddSoldierButton />
+								</Box>
+							</>
+						)}
+					</Box>
+				</Drawer>
+			</Toolbar>
+		</AppBar>
+	);
 }
