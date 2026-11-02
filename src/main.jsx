@@ -7,6 +7,33 @@ import App from "./App.jsx";
 const theme = createTheme({
 	palette: {
 		mode: "dark",
+		background: {
+			default: "#0B0F19",
+			paper: "#111827",
+		},
+		text: {
+			primary: "#F1F5F9",
+			secondary: "rgb(181, 192, 206)",
+		},
+		primary: {
+			main: "#10B981",
+			light: "#34D399",
+			dark: "#059669",
+		},
+		secondary: {
+			main: "#F59E0B",
+		},
+		divider: "rgba(255, 255, 255, 0.08)",
+	},
+	typography: {
+		fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+		button: {
+			textTransform: "none",
+			fontWeight: 600,
+		},
+	},
+	shape: {
+		borderRadius: 10,
 	},
 });
 

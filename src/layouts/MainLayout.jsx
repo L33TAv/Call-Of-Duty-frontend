@@ -6,8 +6,7 @@ export default function MainLayout() {
 	return (
 		<Box>
 			<NavBar />
-
-			<Box component="main">
+			<Box component="main" sx={{ p: 1 }}>
 				<Outlet />
 			</Box>
 		</Box>
