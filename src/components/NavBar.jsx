@@ -82,6 +82,9 @@ export default function NavBar() {
               Admin
             </Button>
 
+          </Box>
+        </Box>
+
         <Box sx={{ display: { xs: "block", md: "none" } }}>
           <IconButton color="inherit" onClick={handleDrawerToggle}>
             <MenuIcon />
