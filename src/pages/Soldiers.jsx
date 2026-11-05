@@ -6,9 +6,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 import SoldierCard from "../components/Card";
-import { useEffect, useRef } from "react";
 import SearchBar from "../components/SearchBar";
 
 const PAGE_SIZE = 15;
