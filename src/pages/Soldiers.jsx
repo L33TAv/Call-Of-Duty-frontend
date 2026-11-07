@@ -4,9 +4,14 @@ import {
   CircularProgress,
   Container,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import SoldierCard from "../components/Card";
 import SearchBar from "../components/SearchBar";
@@ -23,7 +28,12 @@ const fetchSoldiers = async ({ pageParam = 1 }) => {
   return response.json();
 };
 
+const deleteSoldier = async(soldierId) => {
+
+}
+
 export default function SoldiersPage() {
+  const [selectedSoldier, setSelectedSoldier] = useState(null);
   const loadMoreRef = useRef(null);
   const {
     data,
@@ -32,7 +42,7 @@ export default function SoldiersPage() {
     isFetchingNextPage,
     isLoading,
     isError,
-    error,
+    errorta
   } = useInfiniteQuery({
     queryKey: ["soldiers"],
     queryFn: fetchSoldiers,
@@ -64,7 +74,7 @@ export default function SoldiersPage() {
     );
 
     if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
+      observer.tae(loadMoreRef.current);
     }
 
     return () => observer.disconnect();
@@ -100,7 +110,11 @@ export default function SoldiersPage() {
         }}
       >
         {filteredSoldiers.map((soldier) => (
-          <SoldierCard key={soldier._id} soldier={soldier} />
+          <SoldierCard
+            key={soldier._id}
+            soldier={soldier}
+            onSelect={setSelectedSoldier}
+          />
         ))}
       </Box>
       {filteredSoldiers.length === 0 && !isLoading && (
@@ -116,6 +130,47 @@ export default function SoldiersPage() {
           <CircularProgress size={28} color="primary" />
         </Box>
       )}
+      <Dialog
+        open={Boolean(selectedSoldier)}
+        onClose={() => setSelectedSoldier(null)}
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            maxWidth: {
+              xs: "95%",
+              sm: "500px",
+              md: "700px",
+            },
+          },
+        }}
+      >
+        <DialogTitle>{selectedSoldier?.name}</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>ID:</strong> {selectedSoldier?._id}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>Rank:</strong> {selectedSoldier?.rank?.name || "Unknown"}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Limitations:</strong>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {selectedSoldier?.limitations?.join(", ") || "None"}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={() => {
+              setSelectedSoldier(null);
+            }}
+          >
+            Delete
+          </Button>
+          <Button onClick={() => setSelectedSoldier(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

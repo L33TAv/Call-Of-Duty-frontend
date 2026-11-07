@@ -8,11 +8,13 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function SoldierCard({ soldier }) {
+export default function SoldierCard({ soldier, onSelect }) {
   return (
     <Card
       variant="outlined"
+      onClick={() => onSelect?.(soldier)}
       sx={{
+        cursor: "pointer",
         minHeight: 200,
         height: "100%",
         display: "flex",
