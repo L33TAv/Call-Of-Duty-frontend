@@ -19,7 +19,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
-import SoldierCard from "../components/Card";
+import { SoldierCard } from "../components/Card";
 import SearchBar from "../components/SearchBar";
 
 const PAGE_SIZE = 15;
