@@ -15,14 +15,10 @@ import {
 	Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { Link, useLocation } from "react-router";
-import AddSoldierButton from "./addSoldierButton";
+import { Link } from "react-router";
 
 export default function NavBar() {
 	const [isOpen, setOpen] = useState(false);
-	const location = useLocation();
-
-	const isSoldiersPage = location.pathname === "/soldiers";
 
 	function handleDrawerToggle() {
 		setOpen(!isOpen);
@@ -85,8 +81,6 @@ export default function NavBar() {
 						<Button color="inherit" component={Link} to="/admin">
 							Admin
 						</Button>
-
-						{isSoldiersPage && <AddSoldierButton />}
 					</Box>
 				</Box>
 
@@ -122,14 +116,6 @@ export default function NavBar() {
 								</ListItemButton>
 							</ListItem>
 						</List>
-						{isSoldiersPage && (
-							<>
-								<Divider sx={{ my: 1.5 }} />
-								<Box>
-									<AddSoldierButton />
-								</Box>
-							</>
-						)}
 					</Box>
 				</Drawer>
 			</Toolbar>
