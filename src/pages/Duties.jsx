@@ -14,9 +14,9 @@ const PAGE_SIZE = 15;
 const fetchDuties = async (pageParam = 1) => {
 	const response = await fetch(`/duties?page=${pageParam}&limit=${PAGE_SIZE}`);
 
-    if (!response.ok) throw new Error("Network response was not ok");
+	if (!response.ok) throw new Error("Network response was not ok");
 
-    return response.json();
+	return response.json();
 };
 
 export default function DutiesPage() {
