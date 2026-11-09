@@ -68,7 +68,7 @@ export default function SoldiersPage() {
 			queryClient.invalidateQueries({ queryKey: ["soldiers"] });
 
 			setSelectedSoldier(null);
-			
+
 			setShowToast({
 				open: true,
 				message: "Soldier deleted successfully!",
