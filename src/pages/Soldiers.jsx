@@ -1,12 +1,23 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Snackbar,
   Typography,
 } from "@mui/material";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import SoldierCard from "../components/Card";
 import SearchBar from "../components/SearchBar";
@@ -23,7 +34,22 @@ const fetchSoldiers = async ({ pageParam = 1 }) => {
   return response.json();
 };
 
+const deleteSoldier = async (soldierId) => {
+  const response = await fetch(`/soldiers/${soldierId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message);
+  }
+};
+
 export default function SoldiersPage() {
+  const [selectedSoldier, setSelectedSoldier] = useState(null);
+  const [showToast, setShowToast] = useState({ open: false });
   const loadMoreRef = useRef(null);
   const {
     data,
@@ -53,6 +79,35 @@ export default function SoldiersPage() {
     soldier.name.toLowerCase().includes(soldierQuery.toLowerCase()),
   );
 
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteSoldier,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["soldiers"] });
+
+      setShowToast({
+        open: true,
+        message: "Soldier deleted successfully!",
+        severity: "success",
+        isDelete: true,
+      });
+    },
+
+    onError: (error) => {
+      setShowToast({
+        open: true,
+        message: error.message || "Failed to delete soldier. Please try again.",
+        severity: "error",
+      });
+    },
+  });
+
+  const onDelete = (soldierId) => {
+    deleteMutation.mutate(soldierId);
+  };
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -76,6 +131,7 @@ export default function SoldiersPage() {
         <CircularProgress aria-label="Loading…" color="primary" />
       </Box>
     );
+
   if (isError)
     return (
       <Container sx={{ py: 4 }}>
@@ -101,7 +157,11 @@ export default function SoldiersPage() {
         }}
       >
         {filteredSoldiers.map((soldier) => (
-          <SoldierCard key={soldier._id} soldier={soldier} />
+          <SoldierCard
+            key={soldier._id}
+            soldier={soldier}
+            onSelect={setSelectedSoldier}
+          />
         ))}
       </Box>
       {filteredSoldiers.length === 0 && !isLoading && (
@@ -117,6 +177,67 @@ export default function SoldiersPage() {
           <CircularProgress size={28} color="primary" />
         </Box>
       )}
+      <Dialog
+        open={Boolean(selectedSoldier)}
+        onClose={() => setSelectedSoldier(null)}
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            maxWidth: {
+              xs: "95%",
+              sm: "500px",
+              md: "700px",
+            },
+          },
+        }}
+      >
+        <DialogTitle>{selectedSoldier?.name}</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>ID:</strong> {selectedSoldier?._id}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>Rank:</strong> {selectedSoldier?.rank?.name || "Unknown"}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Limitations:</strong>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {selectedSoldier?.limitations?.join(", ") || "None"}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={() => {
+              onDelete(selectedSoldier._id);
+              setSelectedSoldier(null);
+            }}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? "Deleting..." : "Delete"}
+          </Button>
+          <Button onClick={() => setSelectedSoldier(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={showToast.open}
+        autoHideDuration={2000}
+        onClose={() => setShowToast({ ...showToast, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setShowToast({ ...showToast, open: false })}
+          severity={showToast?.severity || "info"}
+          variant="filled"
+          icon={
+            showToast?.isDelete ? <DeleteIcon fontSize="inherit" /> : undefined
+          }
+          sx={{ width: "100%" }}
+        >
+          {showToast?.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
