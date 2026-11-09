@@ -19,33 +19,12 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
+import { deleteSoldier, fetchSoldiers } from "../api/soldiers";
+import AddSoldierButton from "../components/AddSoldierButton";
 import { SoldierCard } from "../components/Card";
 import SearchBar from "../components/SearchBar";
 
 const PAGE_SIZE = 15;
-
-const fetchSoldiers = async ({ pageParam = 1 }) => {
-	const response = await fetch(
-		`/soldiers?page=${pageParam}&limit=${PAGE_SIZE}`,
-	);
-
-	if (!response.ok) throw new Error("Network response was not ok");
-
-	return response.json();
-};
-
-const deleteSoldier = async (soldierId) => {
-	const response = await fetch(`/soldiers/${soldierId}`, {
-		method: "DELETE",
-		headers: {
-			"Content-Type": "application/json",
-		},
-	});
-	if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message);
-	}
-};
 
 export default function SoldiersPage() {
 	const [selectedSoldier, setSelectedSoldier] = useState(null);
@@ -61,7 +40,8 @@ export default function SoldiersPage() {
 		error,
 	} = useInfiniteQuery({
 		queryKey: ["soldiers"],
-		queryFn: fetchSoldiers,
+		queryFn: ({ pageParam }) =>
+			fetchSoldiers({ pageParam, pageSize: PAGE_SIZE }),
 		initialPageParam: 1,
 		getNextPageParam: (lastPage, allPages) => {
 			if (lastPage.length < PAGE_SIZE) return undefined;
@@ -87,6 +67,8 @@ export default function SoldiersPage() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["soldiers"] });
 
+			setSelectedSoldier(null);
+			
 			setShowToast({
 				open: true,
 				message: "Soldier deleted successfully!",
@@ -141,8 +123,21 @@ export default function SoldiersPage() {
 
 	return (
 		<Container sx={{ py: 2 }}>
-			<Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					flexDirection: {
+						xs: "column",
+						sm: "row",
+					},
+					gap: 2,
+					mb: 3,
+				}}
+			>
 				<SearchBar />
+				<AddSoldierButton />
 			</Box>
 			<Box
 				sx={{
@@ -211,7 +206,6 @@ export default function SoldiersPage() {
 						color="error"
 						onClick={() => {
 							onDelete(selectedSoldier._id);
-							setSelectedSoldier(null);
 						}}
 						disabled={deleteMutation.isPending}
 					>

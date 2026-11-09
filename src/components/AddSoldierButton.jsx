@@ -14,6 +14,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import {postSoldier} from '../api/soldiers'
 
 const RANK_NAMES = {
 	0: "private",
@@ -23,21 +24,6 @@ const RANK_NAMES = {
 	4: "captain",
 	5: "major",
 	6: "colonel",
-};
-
-const postSoldier = async (soldier) => {
-	const response = await fetch("/soldiers/", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(soldier),
-	});
-	if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message);
-	}
-	return response.json();
 };
 
 export default function AddSoldierButton() {
