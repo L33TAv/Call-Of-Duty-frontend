@@ -14,7 +14,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import {postSoldier} from '../api/soldiers'
+import { postSoldier } from "../api/soldiers";
 
 const RANK_NAMES = {
 	0: "private",
