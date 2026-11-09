@@ -7,17 +7,10 @@ import {
 } from "@mui/material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
+import { fetchDuties } from "../api/duties";
 import { DutyCard } from "../components/Card";
 
 const PAGE_SIZE = 15;
-
-const fetchDuties = async (pageParam = 1) => {
-	const response = await fetch(`/duties?page=${pageParam}&limit=${PAGE_SIZE}`);
-
-	if (!response.ok) throw new Error("Network response was not ok");
-
-	return response.json();
-};
 
 export default function DutiesPage() {
 	const loadMoreRef = useRef(null);
@@ -31,7 +24,7 @@ export default function DutiesPage() {
 		error,
 	} = useInfiniteQuery({
 		queryKey: ["duties"],
-		queryFn: fetchDuties,
+		queryFn: ({ pageParam }) => fetchDuties({ pageParam, pageSize: PAGE_SIZE }),
 		initialPageParam: 1,
 		getNextPageParam: (lastPage, allPages) => {
 			if (lastPage.length < PAGE_SIZE) return undefined;
