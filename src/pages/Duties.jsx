@@ -7,8 +7,11 @@ import {
 } from "@mui/material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
+import { useSearchParams } from "react-router";
 import { fetchDuties } from "../api/duties";
+import AddDutiesButton from "../components/AddDutiesButton";
 import { DutyCard } from "../components/Card";
+import SearchBar from "../components/SearchBar";
 
 const PAGE_SIZE = 15;
 
@@ -33,7 +36,15 @@ export default function DutiesPage() {
 		},
 	});
 
+	const [searchParams] = useSearchParams();
+
+	const dutyQuery = searchParams.get("q") || "";
+
 	const allDuties = data?.pages.flat() || [];
+
+	const filteredDuties = allDuties.filter((duty) =>
+		duty.name.toLowerCase().includes(dutyQuery.toLowerCase()),
+	);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(
@@ -70,6 +81,22 @@ export default function DutiesPage() {
 		<Container sx={{ py: 2 }}>
 			<Box
 				sx={{
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					flexDirection: {
+						xs: "column",
+						sm: "row",
+					},
+					gap: 2,
+					mb: 3,
+				}}
+			>
+				<SearchBar label="Search for a duty" />
+				<AddDutiesButton />
+			</Box>
+			<Box
+				sx={{
 					gap: 2,
 					display: "grid",
 					gridTemplateColumns: {
@@ -80,11 +107,11 @@ export default function DutiesPage() {
 					},
 				}}
 			>
-				{allDuties.map((duty) => (
+				{filteredDuties.map((duty) => (
 					<DutyCard key={duty._id} duty={duty} />
 				))}
 			</Box>
-			{allDuties.length === 0 && !isLoading && (
+			{filteredDuties.length === 0 && !isLoading && (
 				<Box sx={{ textAlign: "center", py: 6 }}>
 					<Typography color="text.secondary">No duties found.</Typography>
 				</Box>

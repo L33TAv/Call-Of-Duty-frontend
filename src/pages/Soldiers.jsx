@@ -136,7 +136,7 @@ export default function SoldiersPage() {
 					mb: 3,
 				}}
 			>
-				<SearchBar />
+				<SearchBar label="Search for a soldier" />
 				<AddSoldierButton />
 			</Box>
 			<Box
