@@ -2,13 +2,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import { InputAdornment, TextField } from "@mui/material";
 import { useSearchParams } from "react-router";
 
-export default function SearchBar() {
+export default function SearchBar({ label }) {
 	const [soldierParam, setSoldierParam] = useSearchParams();
 
 	return (
 		<TextField
 			id="outlined-basic"
-			label="Search for a soldier"
+			label={label}
 			variant="outlined"
 			size="small"
 			slotProps={{
