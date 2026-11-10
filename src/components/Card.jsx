@@ -97,10 +97,11 @@ export function SoldierCard({ soldier, onSelect }) {
 	);
 }
 
-export function DutyCard({ duty }) {
+export function DutyCard({ duty, onSelect }) {
 	return (
 		<Card
 			variant="outlined"
+			onClick={() => onSelect?.(duty)}
 			sx={{
 				width: { xs: "50%", sm: "85%", md: "100%" },
 				mx: "auto",
