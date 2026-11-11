@@ -8,30 +8,27 @@ import {
 	Typography,
 } from "@mui/material";
 
+const CARD_SX = {
+	width: "100%",
+	mx: "auto",
+	cursor: "pointer",
+	minHeight: 200,
+	height: "100%",
+	display: "flex",
+	flexDirection: "column",
+	color: "text.secondary",
+	borderRadius: 3,
+	borderColor: "divider",
+	transition: "transform 0.25s ease, border-color 0.25s ease",
+	"&:hover": {
+		transform: "translateY(-2px)",
+		borderColor: "primary.dark",
+	},
+};
+
 export function SoldierCard({ soldier, onSelect }) {
 	return (
-		<Card
-			variant="outlined"
-			onClick={() => onSelect?.(soldier)}
-			sx={{
-				width: { xs: "50%", sm: "85%", md: "100%" },
-				mx: "auto",
-
-				cursor: "pointer",
-				minHeight: 200,
-				height: "100%",
-				display: "flex",
-				flexDirection: "column",
-				color: "text.secondary",
-				borderRadius: 3,
-				borderColor: "divider",
-				transition: "transform 0.25s ease, border-color 0.25s ease",
-				"&:hover": {
-					transform: "translateY(-2px)",
-					borderColor: "primary.dark",
-				},
-			}}
-		>
+		<Card variant="outlined" onClick={() => onSelect?.(soldier)} sx={CARD_SX}>
 			<CardContent
 				sx={{
 					display: "flex",
@@ -103,18 +100,7 @@ export function DutyCard({ duty, onSelect }) {
 			variant="outlined"
 			onClick={() => onSelect?.(duty)}
 			sx={{
-				width: { xs: "50%", sm: "85%", md: "100%" },
-				mx: "auto",
-
-				cursor: "pointer",
-				minHeight: 200,
-				height: "100%",
-				display: "flex",
-				flexDirection: "column",
-				color: "text.secondary",
-				borderRadius: 3,
-				borderColor: "divider",
-				transition: "transform 0.25s ease, border-color 0.25s ease",
+				...CARD_SX,
 				"&:hover": {
 					transform: "translateY(-2px)",
 					borderColor: duty.status === "scheduled" ? "primary.main" : "red",
