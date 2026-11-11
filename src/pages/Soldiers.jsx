@@ -1,4 +1,3 @@
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
 	Alert,
 	Box,
@@ -9,7 +8,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	Snackbar,
 	Typography,
 } from "@mui/material";
 import {
@@ -17,19 +15,22 @@ import {
 	useMutation,
 	useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { deleteSoldier, fetchSoldiers } from "../api/soldiers";
 import AddSoldierButton from "../components/AddSoldierButton";
 import { SoldierCard } from "../components/Card";
+import FeedbackSnackbar from "../components/FeedbackSnackbar";
+import LoadingSpinner from "../components/LoadingSpinner";
 import SearchBar from "../components/SearchBar";
+import useInfiniteScroll from "../hooks/useInfiniteScroll";
 
 const PAGE_SIZE = 15;
 
 export default function SoldiersPage() {
 	const [selectedSoldier, setSelectedSoldier] = useState(null);
 	const [showToast, setShowToast] = useState({ open: false });
-	const loadMoreRef = useRef(null);
+
 	const {
 		data,
 		fetchNextPage,
@@ -90,29 +91,13 @@ export default function SoldiersPage() {
 		deleteMutation.mutate(soldierId);
 	};
 
-	useEffect(() => {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-					fetchNextPage();
-				}
-			},
-			{ threshold: 0.5, rootMargin: "200px" },
-		);
+	const loadMoreRef = useInfiniteScroll({
+		hasNextPage,
+		isFetchingNextPage,
+		fetchNextPage,
+	});
 
-		if (loadMoreRef.current) {
-			observer.observe(loadMoreRef.current);
-		}
-
-		return () => observer.disconnect();
-	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-	if (isLoading)
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-				<CircularProgress aria-label="Loading…" color="primary" />
-			</Box>
-		);
+	if (isLoading) return <LoadingSpinner />;
 
 	if (isError)
 		return (
@@ -216,24 +201,7 @@ export default function SoldiersPage() {
 					<Button onClick={() => setSelectedSoldier(null)}>Close</Button>
 				</DialogActions>
 			</Dialog>
-			<Snackbar
-				open={showToast.open}
-				autoHideDuration={2000}
-				onClose={() => setShowToast({ ...showToast, open: false })}
-				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-			>
-				<Alert
-					onClose={() => setShowToast({ ...showToast, open: false })}
-					severity={showToast?.severity || "info"}
-					variant="filled"
-					icon={
-						showToast?.isDelete ? <DeleteIcon fontSize="inherit" /> : undefined
-					}
-					sx={{ width: "100%" }}
-				>
-					{showToast?.message}
-				</Alert>
-			</Snackbar>
+			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
 		</Container>
 	);
 }

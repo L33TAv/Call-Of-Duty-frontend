@@ -7,7 +7,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	MenuItem,
-	Snackbar,
 	Stack,
 	TextField,
 } from "@mui/material";
@@ -15,6 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { postSoldier } from "../api/soldiers";
+import FeedbackSnackbar from "./FeedbackSnackbar";
 
 const RANK_NAMES = {
 	0: "private",
@@ -28,7 +28,7 @@ const RANK_NAMES = {
 
 export default function AddSoldierButton() {
 	const [open, setOpen] = useState(false);
-	const [showSuccess, setShowSuccess] = useState(false);
+	const [showToast, setShowToast] = useState({ open: false });
 	const queryClient = useQueryClient();
 
 	const {
@@ -52,7 +52,11 @@ export default function AddSoldierButton() {
 
 			reset();
 
-			setShowSuccess(true);
+			setShowToast({
+				open: true,
+				message: "Soldier added successfully!",
+				severity: "success",
+			});
 		},
 
 		onError: (error) => {
@@ -210,21 +214,7 @@ export default function AddSoldierButton() {
 				</form>
 			</Dialog>
 
-			<Snackbar
-				open={showSuccess}
-				autoHideDuration={2000}
-				onClose={() => setShowSuccess(false)}
-				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-			>
-				<Alert
-					onClose={() => setShowSuccess(false)}
-					severity="success"
-					variant="filled"
-					sx={{ width: "100%" }}
-				>
-					Soldier added successfully!
-				</Alert>
-			</Snackbar>
+			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
 		</>
 	);
 }
