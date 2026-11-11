@@ -7,8 +7,10 @@ export const postSoldier = async (soldier) => {
 		body: JSON.stringify(soldier),
 	});
 	if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message);
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
 	}
 	return response.json();
 };
@@ -29,7 +31,9 @@ export const deleteSoldier = async (soldierId) => {
 		},
 	});
 	if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message);
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
 	}
 };

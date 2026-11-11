@@ -162,7 +162,9 @@ export default function SoldiersPage() {
 			{filteredSoldiers.length === 0 && !isLoading && (
 				<Box sx={{ textAlign: "center", py: 6 }}>
 					<Typography color="text.secondary">
-						No soldiers found matching "{soldierQuery}"
+						{soldierQuery
+							? `No soldiers found matching ${soldierQuery}`
+							: "No soldiers found."}
 					</Typography>
 				</Box>
 			)}

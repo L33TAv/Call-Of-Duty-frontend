@@ -15,8 +15,10 @@ export const postDuty = async (duty) => {
 		body: JSON.stringify(duty),
 	});
 	if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message);
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
 	}
 	return response.json();
 };
@@ -29,7 +31,9 @@ export const deleteDuty = async (dutyId) => {
 		},
 	});
 	if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message);
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
 	}
 };
