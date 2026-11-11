@@ -157,7 +157,11 @@ export default function DutiesPage() {
 			</Box>
 			{filteredDuties.length === 0 && !isLoading && (
 				<Box sx={{ textAlign: "center", py: 6 }}>
-					<Typography color="text.secondary">No duties found.</Typography>
+					<Typography color="text.secondary">
+						{dutyQuery
+							? `No duties found matching ${dutyQuery}`
+							: "No duties found."}
+					</Typography>
 				</Box>
 			)}
 			<div ref={loadMoreRef} style={{ height: "20px", visibility: "hidden" }} />

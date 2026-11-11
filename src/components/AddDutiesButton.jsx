@@ -25,6 +25,7 @@ export default function AddDutiesButton() {
 		handleSubmit,
 		reset,
 		setError,
+		clearErrors,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -85,6 +86,7 @@ export default function AddDutiesButton() {
 	};
 
 	const handleClose = () => {
+		clearErrors();
 		reset();
 		setOpen(false);
 	};
@@ -106,12 +108,7 @@ export default function AddDutiesButton() {
 			>
 				Add a duty
 			</Button>
-			<Dialog
-				open={open}
-				onClose={() => setOpen(false)}
-				maxWidth="xs"
-				fullWidth
-			>
+			<Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
 				<DialogTitle>Add a New Duty</DialogTitle>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<DialogContent>
@@ -144,6 +141,7 @@ export default function AddDutiesButton() {
 								multiline
 								rows={4}
 								{...register("description", {
+									required: "Description is required",
 									maxLength: {
 										value: 100,
 										message: "Must be shorter than 100 characters",
@@ -182,7 +180,7 @@ export default function AddDutiesButton() {
 											return "The coordinates must contains 2-3 points.";
 										}
 
-										const [lon, lat] = value.map(Number);
+										const [lon, lat] = value;
 
 										if (lon < -180 || lon > 180 || lat < -90 || lat > 90) {
 											return "Invalid coordinates: Longitude (-180 to 180), Latitude (-90 to 90).";
@@ -210,7 +208,7 @@ export default function AddDutiesButton() {
 									setValueAs: (value) =>
 										value === "" || value === null ? undefined : Number(value),
 									validate: (value) => {
-										if (value < 0) {
+										if (value < 1) {
 											return "value must be positive.";
 										}
 
@@ -256,8 +254,10 @@ export default function AddDutiesButton() {
 								}}
 								{...register("soldiersRequired", {
 									required: "soldiers required is a required property",
+									setValueAs: (value) =>
+										value === "" || value === null ? undefined : Number(value),
 									validate: (value) => {
-										if (value < 0) {
+										if (value < 1) {
 											return "soldiers required must be positive.";
 										}
 
@@ -270,7 +270,7 @@ export default function AddDutiesButton() {
 
 							<TextField
 								label="Start Time"
-								type="date"
+								type="datetime-local"
 								fullWidth
 								slotProps={{
 									inputLabel: {
@@ -295,7 +295,7 @@ export default function AddDutiesButton() {
 
 							<TextField
 								label="End Time"
-								type="date"
+								type="datetime-local"
 								fullWidth
 								slotProps={{
 									inputLabel: {
@@ -336,6 +336,8 @@ export default function AddDutiesButton() {
 									},
 								}}
 								{...register("minRank", {
+									setValueAs: (value) =>
+										value === "" || value === null ? undefined : Number(value),
 									validate: (value) => {
 										if (value < 0 || value > 6) {
 											return "value must be between 1 to 6.";
@@ -360,9 +362,15 @@ export default function AddDutiesButton() {
 									},
 								}}
 								{...register("maxRank", {
-									validate: (value) => {
+									setValueAs: (value) =>
+										value === "" || value === null ? undefined : Number(value),
+									validate: (value, formValues) => {
 										if (value < 0 || value > 6) {
 											return "value must be between 1 to 6.";
+										}
+
+										if (value < formValues.minRank) {
+											return "maximum rank must be bigger than minimum rank.";
 										}
 
 										return true;

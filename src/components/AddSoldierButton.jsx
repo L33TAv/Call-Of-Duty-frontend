@@ -36,6 +36,7 @@ export default function AddSoldierButton() {
 		handleSubmit,
 		reset,
 		setError,
+		clearErrors,
 		formState: { errors },
 	} = useForm({
 		defaultValues: { _id: "", name: "", rankName: "", limitations: "" },
@@ -79,6 +80,7 @@ export default function AddSoldierButton() {
 	};
 
 	const handleClose = () => {
+		clearErrors();
 		reset();
 		setOpen(false);
 	};
@@ -100,12 +102,7 @@ export default function AddSoldierButton() {
 			>
 				Add a soldier
 			</Button>
-			<Dialog
-				open={open}
-				onClose={() => setOpen(false)}
-				maxWidth="xs"
-				fullWidth
-			>
+			<Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
 				<DialogTitle>Add a New Soldier</DialogTitle>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<DialogContent>
