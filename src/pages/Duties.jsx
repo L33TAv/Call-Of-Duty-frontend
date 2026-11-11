@@ -28,7 +28,7 @@ import useInfiniteScroll from "../hooks/useInfiniteScroll";
 const PAGE_SIZE = 15;
 
 export default function DutiesPage() {
-	const [selectedDuty, setSelectedDuty] = useState(null);
+	const [selectedDuty, setSelectedDuty] = useState({ open: false });
 	const [showToast, setShowToast] = useState({ open: false });
 	const {
 		data,
@@ -57,7 +57,7 @@ export default function DutiesPage() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["duties"] });
 
-			setSelectedDuty(null);
+			setSelectedDuty({ open: false });
 
 			setShowToast({
 				open: true,
@@ -86,8 +86,8 @@ export default function DutiesPage() {
 		duty.name.toLowerCase().includes(dutyQuery.toLowerCase()),
 	);
 
-	const onDelete = (soldierId) => {
-		deleteMutation.mutate(soldierId);
+	const onDelete = (dutyId) => {
+		deleteMutation.mutate(dutyId);
 	};
 
 	const loadMoreRef = useInfiniteScroll({
@@ -156,8 +156,8 @@ export default function DutiesPage() {
 			)}
 
 			<Dialog
-				open={Boolean(selectedDuty)}
-				onClose={() => setSelectedDuty(null)}
+				open={Boolean(selectedDuty.open)}
+				onClose={() => setSelectedDuty({ ...selectedDuty, open: false })}
 				fullWidth
 				sx={{
 					"& .MuiDialog-paper": {
@@ -187,12 +187,12 @@ export default function DutiesPage() {
 					</Typography>
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 						<strong>Start Time:</strong>{" "}
-						{new Date(selectedDuty?.startTime).toLocaleDateString()}
+						{new Date(selectedDuty?.startTime).toLocaleString() || "Unknown"}
 					</Typography>
 
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 						<strong>End Time:</strong>{" "}
-						{new Date(selectedDuty?.endTime).toLocaleDateString()}
+						{new Date(selectedDuty?.endTime).toLocaleString() || "Unknown"}
 					</Typography>
 
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -210,6 +210,16 @@ export default function DutiesPage() {
 							? selectedDuty?.soldiers.join(", ")
 							: " None assigned"}
 					</Typography>
+
+					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+						<strong>Minimum Rank:</strong>{" "}
+						{selectedDuty?.minRank || " Not assigned"}
+					</Typography>
+
+					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+						<strong>Maximum Rank:</strong>{" "}
+						{selectedDuty?.maxRank || " Not assigned"}
+					</Typography>
 				</DialogContent>
 				<DialogActions>
 					<Button
@@ -221,7 +231,11 @@ export default function DutiesPage() {
 					>
 						{deleteMutation.isPending ? "Deleting..." : "Delete"}
 					</Button>
-					<Button onClick={() => setSelectedDuty(null)}>Close</Button>
+					<Button
+						onClick={() => setSelectedDuty({ ...selectedDuty, open: false })}
+					>
+						Close
+					</Button>
 				</DialogActions>
 			</Dialog>
 			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />

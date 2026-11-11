@@ -26,9 +26,6 @@ export const postDuty = async (duty) => {
 export const deleteDuty = async (dutyId) => {
 	const response = await fetch(`/duties/${dutyId}`, {
 		method: "DELETE",
-		headers: {
-			"Content-Type": "application/json",
-		},
 	});
 	if (!response.ok) {
 		const errorData = await response.json().catch(() => null);

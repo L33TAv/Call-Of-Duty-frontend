@@ -3,11 +3,11 @@ import { InputAdornment, TextField } from "@mui/material";
 import { useSearchParams } from "react-router";
 
 export default function SearchBar({ label }) {
-	const [soldierParam, setSoldierParam] = useSearchParams();
+	const [Param, setParam] = useSearchParams();
 
 	return (
 		<TextField
-			id="outlined-basic"
+			id={label}
 			label={label}
 			variant="outlined"
 			size="small"
@@ -21,13 +21,13 @@ export default function SearchBar({ label }) {
 				},
 			}}
 			sx={{ width: { xs: 180, sm: 220, md: 250 } }}
-			value={soldierParam.get("q") || ""}
+			value={Param.get("q") || ""}
 			onChange={(e) => {
-				const next = new URLSearchParams(soldierParam);
+				const next = new URLSearchParams(Param);
 				const text = e.target.value;
 				if (text) next.set("q", text);
 				else next.delete("q");
-				setSoldierParam(next, { replace: true });
+				setParam(next, { replace: true });
 			}}
 		/>
 	);
