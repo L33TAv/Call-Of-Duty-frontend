@@ -28,7 +28,7 @@ import useInfiniteScroll from "../hooks/useInfiniteScroll";
 const PAGE_SIZE = 15;
 
 export default function SoldiersPage() {
-	const [selectedSoldier, setSelectedSoldier] = useState(null);
+	const [selectedSoldier, setSelectedSoldier] = useState({ open: false });
 	const [showToast, setShowToast] = useState({ open: false });
 
 	const {
@@ -68,7 +68,7 @@ export default function SoldiersPage() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["soldiers"] });
 
-			setSelectedSoldier(null);
+			setSelectedSoldier({ ...selectedSoldier, open: false });
 
 			setShowToast({
 				open: true,
@@ -160,8 +160,8 @@ export default function SoldiersPage() {
 				</Box>
 			)}
 			<Dialog
-				open={Boolean(selectedSoldier)}
-				onClose={() => setSelectedSoldier(null)}
+				open={Boolean(selectedSoldier.open)}
+				onClose={() => setSelectedSoldier({ ...selectedSoldier, open: false })}
 				fullWidth
 				sx={{
 					"& .MuiDialog-paper": {
@@ -198,7 +198,13 @@ export default function SoldiersPage() {
 					>
 						{deleteMutation.isPending ? "Deleting..." : "Delete"}
 					</Button>
-					<Button onClick={() => setSelectedSoldier(null)}>Close</Button>
+					<Button
+						onClick={() =>
+							setSelectedSoldier({ ...selectedSoldier, open: false })
+						}
+					>
+						Close
+					</Button>
 				</DialogActions>
 			</Dialog>
 			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />

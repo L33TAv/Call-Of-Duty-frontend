@@ -16,15 +16,15 @@ import { useForm } from "react-hook-form";
 import { postSoldier } from "../api/soldiers";
 import FeedbackSnackbar from "./FeedbackSnackbar";
 
-const RANK_NAMES = {
-	0: "private",
-	1: "corporal",
-	2: "sergeant",
-	3: "lieutenant",
-	4: "captain",
-	5: "major",
-	6: "colonel",
-};
+const RANK_NAMES = [
+	"private",
+	"corporal",
+	"sergeant",
+	"lieutenant",
+	"captain",
+	"major",
+	"colonel",
+];
 
 export default function AddSoldierButton() {
 	const [open, setOpen] = useState(false);
@@ -119,7 +119,7 @@ export default function AddSoldierButton() {
 								label="Name"
 								fullWidth
 								{...register("name", {
-									required: "First name is required",
+									required: "Name is required",
 									minLength: {
 										value: 3,
 										message: "Must be at least 3 characters",
@@ -146,13 +146,13 @@ export default function AddSoldierButton() {
 								<MenuItem value="" disabled>
 									Select a rank
 								</MenuItem>
-								<MenuItem value={RANK_NAMES[0]}>{RANK_NAMES[0]}</MenuItem>
-								<MenuItem value={RANK_NAMES[1]}>{RANK_NAMES[1]}</MenuItem>
-								<MenuItem value={RANK_NAMES[2]}>{RANK_NAMES[2]}</MenuItem>
-								<MenuItem value={RANK_NAMES[3]}>{RANK_NAMES[3]}</MenuItem>
-								<MenuItem value={RANK_NAMES[4]}>{RANK_NAMES[4]}</MenuItem>
-								<MenuItem value={RANK_NAMES[5]}>{RANK_NAMES[5]}</MenuItem>
-								<MenuItem value={RANK_NAMES[6]}>{RANK_NAMES[6]}</MenuItem>
+								{RANK_NAMES.map((rank) => {
+									return (
+										<MenuItem key={rank} value={rank}>
+											{rank}
+										</MenuItem>
+									);
+								})}
 							</TextField>
 
 							<TextField

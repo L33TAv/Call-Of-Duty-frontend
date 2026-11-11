@@ -28,7 +28,11 @@ const CARD_SX = {
 
 export function SoldierCard({ soldier, onSelect }) {
 	return (
-		<Card variant="outlined" onClick={() => onSelect?.(soldier)} sx={CARD_SX}>
+		<Card
+			variant="outlined"
+			onClick={() => onSelect?.({ ...soldier, open: true })}
+			sx={CARD_SX}
+		>
 			<CardContent
 				sx={{
 					display: "flex",
@@ -98,7 +102,7 @@ export function DutyCard({ duty, onSelect }) {
 	return (
 		<Card
 			variant="outlined"
-			onClick={() => onSelect?.(duty)}
+			onClick={() => onSelect?.({ ...duty, open: true })}
 			sx={{
 				...CARD_SX,
 				"&:hover": {

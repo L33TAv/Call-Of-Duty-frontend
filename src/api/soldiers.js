@@ -26,9 +26,6 @@ export const fetchSoldiers = async ({ pageParam = 1, pageSize }) => {
 export const deleteSoldier = async (soldierId) => {
 	const response = await fetch(`/soldiers/${soldierId}`, {
 		method: "DELETE",
-		headers: {
-			"Content-Type": "application/json",
-		},
 	});
 	if (!response.ok) {
 		const errorData = await response.json().catch(() => null);
