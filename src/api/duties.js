@@ -34,3 +34,20 @@ export const deleteDuty = async (dutyId) => {
 		);
 	}
 };
+
+export const patchDuty = async ({ dutyId, newDuty }) => {
+	const response = await fetch(`/duties/${dutyId}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(newDuty),
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
+	}
+};
