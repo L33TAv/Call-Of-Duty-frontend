@@ -21,6 +21,7 @@ import { deleteSoldier, fetchSoldiers } from "../api/soldiers";
 import AddSoldierButton from "../components/AddSoldierButton";
 import { SoldierCard } from "../components/Card";
 import FeedbackSnackbar from "../components/FeedbackSnackbar";
+import { SoldierFormDialog } from "../components/FormDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
 import SearchBar from "../components/SearchBar";
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
@@ -30,6 +31,7 @@ const PAGE_SIZE = 15;
 export default function SoldiersPage() {
 	const [selectedSoldier, setSelectedSoldier] = useState({ open: false });
 	const [showToast, setShowToast] = useState({ open: false });
+	const [open, setOpen] = useState(false);
 
 	const {
 		data,
@@ -190,6 +192,15 @@ export default function SoldiersPage() {
 				</DialogContent>
 				<DialogActions>
 					<Button
+						color="info"
+						onClick={() => {
+							setOpen(true);
+						}}
+						disabled={open}
+					>
+						Edit
+					</Button>
+					<Button
 						color="error"
 						onClick={() => {
 							onDelete(selectedSoldier._id);
@@ -207,6 +218,13 @@ export default function SoldiersPage() {
 					</Button>
 				</DialogActions>
 			</Dialog>
+			<SoldierFormDialog
+				open={open}
+				setOpen={setOpen}
+				soldier={selectedSoldier}
+				setSoldier={setSelectedSoldier}
+				setShowToast={setShowToast}
+			/>
 			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
 		</Container>
 	);

@@ -21,6 +21,7 @@ import { deleteDuty, fetchDuties } from "../api/duties";
 import AddDutiesButton from "../components/AddDutiesButton";
 import { DutyCard } from "../components/Card";
 import FeedbackSnackbar from "../components/FeedbackSnackbar";
+import { DutyFormDialog } from "../components/FormDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
 import SearchBar from "../components/SearchBar";
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
@@ -30,6 +31,8 @@ const PAGE_SIZE = 15;
 export default function DutiesPage() {
 	const [selectedDuty, setSelectedDuty] = useState({ open: false });
 	const [showToast, setShowToast] = useState({ open: false });
+	const [open, setOpen] = useState(false);
+
 	const {
 		data,
 		fetchNextPage,
@@ -223,6 +226,15 @@ export default function DutiesPage() {
 				</DialogContent>
 				<DialogActions>
 					<Button
+						color="info"
+						onClick={() => {
+							setOpen(true);
+						}}
+						disabled={open}
+					>
+						Edit
+					</Button>
+					<Button
 						color="error"
 						onClick={() => {
 							onDelete(selectedDuty._id);
@@ -238,6 +250,15 @@ export default function DutiesPage() {
 					</Button>
 				</DialogActions>
 			</Dialog>
+
+			<DutyFormDialog
+				open={open}
+				setOpen={setOpen}
+				duty={selectedDuty}
+				setDuty={setSelectedDuty}
+				setShowToast={setShowToast}
+			/>
+
 			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
 		</Container>
 	);

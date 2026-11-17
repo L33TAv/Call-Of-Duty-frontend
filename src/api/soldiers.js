@@ -34,3 +34,20 @@ export const deleteSoldier = async (soldierId) => {
 		);
 	}
 };
+
+export const patchSoldier = async ({ soldierId, newSoldier }) => {
+	const response = await fetch(`/soldiers/${soldierId}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(newSoldier),
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
+	}
+};
