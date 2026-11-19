@@ -1,4 +1,5 @@
 import {
+	Alert,
 	Chip,
 	Dialog,
 	DialogContent,
@@ -8,17 +9,41 @@ import {
 	TableBody,
 	TableCell,
 	TableHead,
+	TablePagination,
 	TableRow,
 	Tooltip,
 	Typography,
 } from "@mui/material";
-import { tableFeatures, useTable } from "@tanstack/react-table";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	createPaginatedRowModel,
+	createSortedRowModel,
+	rowPaginationFeature,
+	rowSortingFeature,
+	tableFeatures,
+	useTable,
+} from "@tanstack/react-table";
 import { useState } from "react";
+import { deleteDuty, fetchDuties } from "../api/duties";
+import { deleteSoldier, fetchSoldiers } from "../api/soldiers";
+import FeedbackSnackbar from "./FeedbackSnackbar";
+import { DutyFormDialog, SoldierFormDialog } from "./FormDialog";
+import LoadingSpinner from "./LoadingSpinner";
+import RowActions from "./RowActions";
+
+const hasNoItems = (items) =>
+	!items?.length || items[0]?.toLowerCase() === "none";
+
+const getItemCount = (items) => (hasNoItems(items) ? 0 : items.length);
+
+const sortByItemCount = (rowA, rowB, columnId) =>
+	getItemCount(rowA.getValue(columnId)) - getItemCount(rowB.getValue(columnId));
 
 const LabelByChips = ({ info }) => {
 	const limits = info.getValue() ?? [];
 
-	if (!limits.length || limits[0]?.toLowerCase() === "none") {
+	if (hasNoItems(limits)) {
 		return <Chip label="None" sx={{ fontSize: "0.75rem" }} size="small" />;
 	}
 
@@ -92,11 +117,119 @@ function ShowHistory({ info }) {
 	);
 }
 
-const duties = [];
-
-const soldiers = [];
+const dutiesColumns = [
+	{
+		id: "actions",
+		header: "Actions",
+		enableSorting: false,
+		cell: ({ row, table }) => (
+			<RowActions
+				row={row}
+				onEdit={table.options.meta.onEdit}
+				onDelete={table.options.meta.onDelete}
+				type="duty"
+			/>
+		),
+	},
+	{
+		accessorKey: "_id",
+		header: "ID",
+	},
+	{
+		accessorKey: "name",
+		header: "Soldier Name",
+	},
+	{
+		accessorKey: "description",
+		header: "Description",
+	},
+	{
+		accessorKey: "location.type",
+		header: "Location Type",
+	},
+	{
+		accessorKey: "location.coordinates",
+		header: "Coordinates",
+		cell: (info) => info.getValue()?.join(", "),
+	},
+	{
+		accessorKey: "startTime",
+		header: "Start Time",
+		cell: (info) => new Date(info.getValue()).toLocaleString(),
+	},
+	{
+		accessorKey: "endTime",
+		header: "End Time",
+		cell: (info) => new Date(info.getValue()).toLocaleString(),
+	},
+	{
+		accessorKey: "constraints",
+		header: "Constraints",
+		cell: (info) => <LabelByChips info={info} />,
+		sortingFn: sortByItemCount,
+	},
+	{
+		accessorKey: "soldiersRequired",
+		header: "Soldiers Required",
+	},
+	{
+		accessorKey: "value",
+		header: "Value",
+	},
+	{
+		accessorKey: "minRank",
+		header: "Minimum Rank",
+		cell: (info) => info.getValue() ?? "-",
+	},
+	{
+		accessorKey: "maxRank",
+		header: "Maximum Rank",
+		cell: (info) => info.getValue() ?? "-",
+	},
+	{
+		accessorKey: "soldiers",
+		header: "Soldiers",
+		cell: (info) => info.getValue()?.length ?? 0,
+	},
+	{
+		accessorKey: "status",
+		header: "Status",
+	},
+	{
+		accessorKey: "statusHistory",
+		header: "Status History",
+		cell: (info) => {
+			return <ShowHistory info={info} />;
+		},
+	},
+	{
+		accessorKey: "createdAt",
+		header: "Created At",
+		cell: (info) =>
+			info.getValue() ? new Date(info.getValue()).toLocaleString() : "-",
+	},
+	{
+		accessorKey: "updatedAt",
+		header: "Updated At",
+		cell: (info) =>
+			info.getValue() ? new Date(info.getValue()).toLocaleString() : "-",
+	},
+];
 
 const soldiersColumns = [
+	{
+		id: "actions",
+		header: "Actions",
+		enableSorting: false,
+		cell: ({ row, table }) => (
+			<RowActions
+				row={row}
+				onEdit={table.options.meta.onEdit}
+				onDelete={table.options.meta.onDelete}
+				type="soldier"
+			/>
+		),
+	},
 	{
 		accessorKey: "_id",
 		header: "ID",
@@ -106,9 +239,11 @@ const soldiersColumns = [
 		header: "Name",
 	},
 	{
-		accessorKey: "limitations",
+		id: "limitations",
+		accessorFn: (row) => row.limitations ?? [],
 		header: "Limitations",
 		cell: (info) => <LabelByChips info={info} />,
+		sortingFn: sortByItemCount,
 	},
 	{
 		accessorKey: "rank.name",
@@ -128,54 +263,222 @@ const soldiersColumns = [
 	},
 ];
 
-const features = tableFeatures({});
+const features = tableFeatures({
+	rowSortingFeature,
+	sortedRowModel: createSortedRowModel(),
 
-function DataTable({ columns, data }) {
-	const table = useTable({ features, columns, data });
+	rowPaginationFeature,
+	paginatedRowModel: createPaginatedRowModel(),
+});
+
+function DataTable({ columns, data, meta }) {
+	const table = useTable({ features, columns, data, meta });
+	const [showToast, setShowToast] = useState({ open: false });
+
 	return (
-		<Table sx={{ width: "100%" }}>
-			<TableHead>
-				{table.getHeaderGroups().map((headerGroup) => (
-					<TableRow
-						key={headerGroup.id}
-						sx={{
-							fontWeight: 700,
-							color: "text.secondary",
-							fontSize: "0.75rem",
-							textTransform: "uppercase",
-							letterSpacing: "0.05em",
-						}}
-					>
-						{headerGroup.headers.map((header) => (
-							<TableCell key={header.id} sx={{ whiteSpace: "nowrap" }}>
-								{header.isPlaceholder ? null : (
-									<table.FlexRender header={header} />
-								)}
-							</TableCell>
-						))}
-					</TableRow>
-				))}
-			</TableHead>
+		<>
+			<Table sx={{ width: "100%" }}>
+				<TableHead>
+					{table.getHeaderGroups().map((headerGroup) => (
+						<TableRow
+							key={headerGroup.id}
+							sx={{
+								fontWeight: 700,
+								color: "text.secondary",
+								fontSize: "0.75rem",
+								textTransform: "uppercase",
+								letterSpacing: "0.05em",
+							}}
+						>
+							{headerGroup.headers.map((header) => {
+								const sorted = header.column.getIsSorted();
 
-			<TableBody>
-				{table.getRowModel().rows.map((row) => (
-					<TableRow hover key={row.id}>
-						{row.getAllCells().map((cell) => (
-							<TableCell key={cell.id}>
-								<table.FlexRender cell={cell} />
-							</TableCell>
-						))}
-					</TableRow>
-				))}
-			</TableBody>
-		</Table>
+								return (
+									<TableCell key={header.id} sx={{ whiteSpace: "nowrap" }}>
+										{header.isPlaceholder ? null : (
+											<TableSortLabel
+												active={!!sorted}
+												direction={sorted || "asc"}
+												onClick={header.column.getToggleSortingHandler()}
+												disabled={!header.column.getCanSort()}
+											>
+												<table.FlexRender header={header} />
+											</TableSortLabel>
+										)}
+									</TableCell>
+								);
+							})}
+						</TableRow>
+					))}
+				</TableHead>
+
+				<TableBody>
+					{table.getRowModel().rows.map((row) => (
+						<TableRow hover key={row.id}>
+							{row.getAllCells().map((cell) => (
+								<TableCell key={cell.id}>
+									<table.FlexRender cell={cell} />
+								</TableCell>
+							))}
+						</TableRow>
+					))}
+				</TableBody>
+			</Table>
+			<TablePagination
+				component="div"
+				count={table.getRowCount()}
+				page={table.state.pagination.pageIndex}
+				rowsPerPage={table.state.pagination.pageSize}
+				onPageChange={(_, newPage) => {
+					table.setPageIndex(newPage);
+				}}
+				onRowsPerPageChange={(event) => {
+					table.setPageSize(Number(event.target.value));
+				}}
+				rowsPerPageOptions={[5, 10, 25, 50]}
+			/>
+
+			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
+		</>
 	);
 }
 
 export function DutiesTable() {
-	return <DataTable data={duties} columns={dutiesColumns} />;
+	const queryClient = useQueryClient();
+
+	const [editingDuty, setEditingDuty] = useState({ open: false });
+	const [editOpen, setEditOpen] = useState(false);
+	const [showToast, setShowToast] = useState(false);
+
+	const { data, isLoading, isError, error } = useQuery({
+		queryKey: ["duties", "table"],
+		queryFn: () => fetchDuties({ pageParam: 1, pageSize: 100 }),
+	});
+
+	const deleteMutation = useMutation({
+		mutationFn: deleteDuty,
+
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["duties"] });
+
+			setEditingDuty({ open: false });
+
+			setShowToast({
+				open: true,
+				message: "Duty deleted successfully!",
+				severity: "success",
+				isDelete: true,
+			});
+		},
+
+		onError: (error) => {
+			setShowToast({
+				open: true,
+				message: error.message || "Failed to delete duty. Please try again.",
+				severity: "error",
+			});
+		},
+	});
+
+	if (isLoading) return <LoadingSpinner />;
+	if (isError)
+		return (
+			<Alert severity="error">Failed to load duties: {error.message}</Alert>
+		);
+
+	return (
+		<>
+			<DataTable
+				data={data}
+				columns={dutiesColumns}
+				meta={{
+					onEdit: (row) => {
+						setEditingDuty(row.original);
+						setEditOpen(true);
+					},
+					onDelete: (row) => deleteMutation.mutate(row.original._id),
+				}}
+			/>
+
+			<DutyFormDialog
+				open={editOpen}
+				duty={editingDuty}
+				setShowToast={setShowToast}
+				setDuty={setEditingDuty}
+				setOpen={setEditOpen}
+			/>
+
+			<FeedbackSnackbar handleShowToast={setShowToast} showToast={showToast} />
+		</>
+	);
 }
 
 export function SoldiersTable() {
-	return <DataTable data={soldiers} columns={soldiersColumns} />;
+	const queryClient = useQueryClient();
+
+	const [editingSoldier, setEditingSoldier] = useState({ open: false });
+	const [editOpen, setEditOpen] = useState(false);
+	const [showToast, setShowToast] = useState(false);
+
+	const { data, isLoading, isError, error } = useQuery({
+		queryKey: ["soldiers", "table"],
+		queryFn: () => fetchSoldiers({ pageParam: 1, pageSize: 100 }),
+	});
+
+	const deleteMutation = useMutation({
+		mutationFn: deleteSoldier,
+
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["soldiers"] });
+
+			setEditingSoldier({ open: false });
+
+			setShowToast({
+				open: true,
+				message: "Soldier deleted successfully!",
+				severity: "success",
+				isDelete: true,
+			});
+		},
+
+		onError: (error) => {
+			setShowToast({
+				open: true,
+				message: error.message || "Failed to delete soldier. Please try again.",
+				severity: "error",
+			});
+		},
+	});
+
+	if (isLoading) return <LoadingSpinner />;
+	if (isError)
+		return (
+			<Alert severity="error">Failed to load soldiers: {error.message}</Alert>
+		);
+
+	return (
+		<>
+			<DataTable
+				data={data}
+				columns={soldiersColumns}
+				meta={{
+					onEdit: (row) => {
+						setEditingSoldier(row.original);
+						setEditOpen(true);
+					},
+					onDelete: (row) => deleteMutation.mutate(row.original._id),
+				}}
+			/>
+
+			<SoldierFormDialog
+				open={editOpen}
+				soldier={editingSoldier}
+				setShowToast={setShowToast}
+				setSoldier={setEditingSoldier}
+				setOpen={setEditOpen}
+			/>
+
+			<FeedbackSnackbar handleShowToast={setShowToast} showToast={showToast} />
+		</>
+	);
 }
