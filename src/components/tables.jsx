@@ -4,10 +4,12 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
+	Paper,
 	Stack,
 	Table,
 	TableBody,
 	TableCell,
+	TableContainer,
 	TableHead,
 	TablePagination,
 	TableRow,
@@ -279,64 +281,76 @@ function DataTable({ columns, data = [], meta }) {
 	const table = useTable({ features, columns, data, meta });
 
 	return (
-		<>
-			<Table sx={{ width: "100%" }}>
-				<TableHead>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow
-							key={headerGroup.id}
-							sx={{
-								fontWeight: 700,
-								color: "text.secondary",
-								fontSize: "0.75rem",
-								textTransform: "uppercase",
-								letterSpacing: "0.05em",
-							}}
-						>
-							{headerGroup.headers.map((header) => {
-								const sorted = header.column.getIsSorted();
+		<Paper variant="outlined">
+			<TableContainer>
+				<Table sx={{ width: "100%" }}>
+					<TableHead>
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow
+								key={headerGroup.id}
+								sx={{
+									fontWeight: 700,
+									color: "text.secondary",
+									fontSize: "0.75rem",
+									textTransform: "uppercase",
+									letterSpacing: "0.05em",
+								}}
+							>
+								{headerGroup.headers.map((header) => {
+									const sorted = header.column.getIsSorted();
 
-								return (
-									<TableCell key={header.id} sx={{ whiteSpace: "nowrap" }}>
-										{header.isPlaceholder ? null : (
-											<TableSortLabel
-												active={!!sorted}
-												direction={sorted || "asc"}
-												onClick={header.column.getToggleSortingHandler()}
-												disabled={!header.column.getCanSort()}
-											>
-												<table.FlexRender header={header} />
-											</TableSortLabel>
-										)}
-									</TableCell>
-								);
-							})}
-						</TableRow>
-					))}
-				</TableHead>
-
-				<TableBody>
-					{table.getRowModel().rows.length === 0 ? (
-						<TableRow>
-							<TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
-								<Typography color="text.secondary">No data found.</Typography>
-							</TableCell>
-						</TableRow>
-					) : (
-						table.getRowModel().rows.map((row) => (
-							<TableRow hover key={row.id}>
-								{row.getAllCells().map((cell) => (
-									<TableCell key={cell.id}>
-										<table.FlexRender cell={cell} />
-									</TableCell>
-								))}
+									return (
+										<TableCell key={header.id} sx={{ whiteSpace: "nowrap" }}>
+											{header.isPlaceholder ? null : (
+												<TableSortLabel
+													active={!!sorted}
+													direction={sorted || "asc"}
+													onClick={header.column.getToggleSortingHandler()}
+													disabled={!header.column.getCanSort()}
+												>
+													<table.FlexRender header={header} />
+												</TableSortLabel>
+											)}
+										</TableCell>
+									);
+								})}
 							</TableRow>
-						))
-					)}
-				</TableBody>
-			</Table>
+						))}
+					</TableHead>
+
+					<TableBody>
+						{table.getRowModel().rows.length === 0 ? (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									align="center"
+									sx={{ py: 4 }}
+								>
+									<Typography color="text.secondary">No data found.</Typography>
+								</TableCell>
+							</TableRow>
+						) : (
+							table.getRowModel().rows.map((row) => (
+								<TableRow hover key={row.id}>
+									{row.getAllCells().map((cell) => (
+										<TableCell key={cell.id}>
+											<table.FlexRender cell={cell} />
+										</TableCell>
+									))}
+								</TableRow>
+							))
+						)}
+					</TableBody>
+				</Table>
+			</TableContainer>
 			<TablePagination
 				component="div"
+				sx={{
+					borderTop: 1,
+					borderColor: "divider",
+					"& .MuiTablePagination-spacer": { display: "none" },
+					"& .MuiTablePagination-toolbar": { justifyContent: "center" },
+				}}
 				count={table.getRowCount()}
 				page={table.state.pagination.pageIndex}
 				rowsPerPage={table.state.pagination.pageSize}
@@ -348,33 +362,43 @@ function DataTable({ columns, data = [], meta }) {
 				}}
 				rowsPerPageOptions={[5, 10, 25, 50]}
 			/>
-		</>
+		</Paper>
 	);
 }
 
-export function DutiesTable() {
+export function ResourceTable({ type }) {
 	const queryClient = useQueryClient();
+	const isSoldierTable = type === "soldier";
+	const resourceKey = isSoldierTable ? "soldiers" : "duties";
 
-	const [editingDuty, setEditingDuty] = useState({ open: false });
+	const [editingTask, setEditingTask] = useState({ open: false });
 	const [editOpen, setEditOpen] = useState(false);
 	const [showToast, setShowToast] = useState({ open: false });
 
 	const { data, isLoading, isError, error } = useQuery({
-		queryKey: ["duties", "table"],
-		queryFn: () => fetchDuties({ pageParam: 1, pageSize: 100 }),
+		queryKey: [resourceKey, "table"],
+		queryFn: () => {
+			if (isSoldierTable) {
+				return fetchSoldiers({ pageParam: 1, pageSize: 100 });
+			}
+
+			return fetchDuties({ pageParam: 1, pageSize: 100 });
+		},
 	});
 
 	const deleteMutation = useMutation({
-		mutationFn: deleteDuty,
+		mutationFn: isSoldierTable ? deleteSoldier : deleteDuty,
 
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["duties"] });
+			queryClient.invalidateQueries({
+				queryKey: [resourceKey],
+			});
 
-			setEditingDuty({ open: false });
+			setEditingTask({ open: false });
 
 			setShowToast({
 				open: true,
-				message: "Duty deleted successfully!",
+				message: `${type} deleted successfully!`,
 				severity: "success",
 				isDelete: true,
 			});
@@ -383,7 +407,7 @@ export function DutiesTable() {
 		onError: (error) => {
 			setShowToast({
 				open: true,
-				message: error.message || "Failed to delete duty. Please try again.",
+				message: error.message || `Failed to delete ${type}. Please try again.`,
 				severity: "error",
 			});
 		},
@@ -392,100 +416,42 @@ export function DutiesTable() {
 	if (isLoading) return <LoadingSpinner />;
 	if (isError)
 		return (
-			<Alert severity="error">Failed to load duties: {error.message}</Alert>
+			<Alert severity="error">
+				Failed to load {resourceKey}: {error.message}
+			</Alert>
 		);
 
 	return (
 		<>
 			<DataTable
 				data={data}
-				columns={dutiesColumns}
+				columns={isSoldierTable ? soldiersColumns : dutiesColumns}
 				meta={{
 					onEdit: (row) => {
-						setEditingDuty(row.original);
+						setEditingTask(row.original);
 						setEditOpen(true);
 					},
 					onDelete: (row) => deleteMutation.mutate(row.original._id),
 				}}
 			/>
 
-			<DutyFormDialog
-				open={editOpen}
-				duty={editingDuty}
-				setShowToast={setShowToast}
-				setDuty={setEditingDuty}
-				setOpen={setEditOpen}
-			/>
-
-			<FeedbackSnackbar handleShowToast={setShowToast} showToast={showToast} />
-		</>
-	);
-}
-
-export function SoldiersTable() {
-	const queryClient = useQueryClient();
-
-	const [editingSoldier, setEditingSoldier] = useState({ open: false });
-	const [editOpen, setEditOpen] = useState(false);
-	const [showToast, setShowToast] = useState({ open: false });
-
-	const { data, isLoading, isError, error } = useQuery({
-		queryKey: ["soldiers", "table"],
-		queryFn: () => fetchSoldiers({ pageParam: 1, pageSize: 100 }),
-	});
-
-	const deleteMutation = useMutation({
-		mutationFn: deleteSoldier,
-
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["soldiers"] });
-
-			setEditingSoldier({ open: false });
-
-			setShowToast({
-				open: true,
-				message: "Soldier deleted successfully!",
-				severity: "success",
-				isDelete: true,
-			});
-		},
-
-		onError: (error) => {
-			setShowToast({
-				open: true,
-				message: error.message || "Failed to delete soldier. Please try again.",
-				severity: "error",
-			});
-		},
-	});
-
-	if (isLoading) return <LoadingSpinner />;
-	if (isError)
-		return (
-			<Alert severity="error">Failed to load soldiers: {error.message}</Alert>
-		);
-
-	return (
-		<>
-			<DataTable
-				data={data}
-				columns={soldiersColumns}
-				meta={{
-					onEdit: (row) => {
-						setEditingSoldier(row.original);
-						setEditOpen(true);
-					},
-					onDelete: (row) => deleteMutation.mutate(row.original._id),
-				}}
-			/>
-
-			<SoldierFormDialog
-				open={editOpen}
-				soldier={editingSoldier}
-				setShowToast={setShowToast}
-				setSoldier={setEditingSoldier}
-				setOpen={setEditOpen}
-			/>
+			{isSoldierTable ? (
+				<SoldierFormDialog
+					open={editOpen}
+					soldier={editingTask}
+					setShowToast={setShowToast}
+					setSoldier={setEditingTask}
+					setOpen={setEditOpen}
+				/>
+			) : (
+				<DutyFormDialog
+					open={editOpen}
+					duty={editingTask}
+					setShowToast={setShowToast}
+					setDuty={setEditingTask}
+					setOpen={setEditOpen}
+				/>
+			)}
 
 			<FeedbackSnackbar handleShowToast={setShowToast} showToast={showToast} />
 		</>
