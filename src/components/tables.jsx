@@ -94,10 +94,11 @@ function ShowHistory({ info }) {
 		<>
 			<Chip
 				clickable
-				label={info.getValue().length}
+				label={info.getValue()?.length}
 				onClick={() => {
 					setOpen(true);
 				}}
+				disabled={!info.getValue()?.length}
 			></Chip>
 
 			<Dialog open={open} onClose={() => setOpen(false)}>
@@ -107,7 +108,8 @@ function ShowHistory({ info }) {
 					<Stack spacing={1}>
 						{info.getValue()?.map((history, index) => (
 							<Typography key={history.date}>
-								{index + 1}: {history.status} {history.date}
+								{index + 1}: {history.status}{" "}
+								{new Date(history.date).toLocaleString()}
 							</Typography>
 						))}
 					</Stack>
@@ -137,7 +139,7 @@ const dutiesColumns = [
 	},
 	{
 		accessorKey: "name",
-		header: "Soldier Name",
+		header: "Duty Name",
 	},
 	{
 		accessorKey: "description",
@@ -155,12 +157,14 @@ const dutiesColumns = [
 	{
 		accessorKey: "startTime",
 		header: "Start Time",
-		cell: (info) => new Date(info.getValue()).toLocaleString(),
+		cell: (info) =>
+			info.getValue() ? new Date(info.getValue()).toLocaleString() : "Unknown",
 	},
 	{
 		accessorKey: "endTime",
 		header: "End Time",
-		cell: (info) => new Date(info.getValue()).toLocaleString(),
+		cell: (info) =>
+			info.getValue() ? new Date(info.getValue()).toLocaleString() : "Unknown",
 	},
 	{
 		accessorKey: "constraints",
@@ -271,9 +275,8 @@ const features = tableFeatures({
 	paginatedRowModel: createPaginatedRowModel(),
 });
 
-function DataTable({ columns, data, meta }) {
+function DataTable({ columns, data = [], meta }) {
 	const table = useTable({ features, columns, data, meta });
-	const [showToast, setShowToast] = useState({ open: false });
 
 	return (
 		<>
@@ -313,15 +316,23 @@ function DataTable({ columns, data, meta }) {
 				</TableHead>
 
 				<TableBody>
-					{table.getRowModel().rows.map((row) => (
-						<TableRow hover key={row.id}>
-							{row.getAllCells().map((cell) => (
-								<TableCell key={cell.id}>
-									<table.FlexRender cell={cell} />
-								</TableCell>
-							))}
+					{table.getRowModel().rows.length === 0 ? (
+						<TableRow>
+							<TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
+								<Typography color="text.secondary">No data found.</Typography>
+							</TableCell>
 						</TableRow>
-					))}
+					) : (
+						table.getRowModel().rows.map((row) => (
+							<TableRow hover key={row.id}>
+								{row.getAllCells().map((cell) => (
+									<TableCell key={cell.id}>
+										<table.FlexRender cell={cell} />
+									</TableCell>
+								))}
+							</TableRow>
+						))
+					)}
 				</TableBody>
 			</Table>
 			<TablePagination
@@ -337,8 +348,6 @@ function DataTable({ columns, data, meta }) {
 				}}
 				rowsPerPageOptions={[5, 10, 25, 50]}
 			/>
-
-			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
 		</>
 	);
 }
@@ -348,7 +357,7 @@ export function DutiesTable() {
 
 	const [editingDuty, setEditingDuty] = useState({ open: false });
 	const [editOpen, setEditOpen] = useState(false);
-	const [showToast, setShowToast] = useState(false);
+	const [showToast, setShowToast] = useState({ open: false });
 
 	const { data, isLoading, isError, error } = useQuery({
 		queryKey: ["duties", "table"],
@@ -418,7 +427,7 @@ export function SoldiersTable() {
 
 	const [editingSoldier, setEditingSoldier] = useState({ open: false });
 	const [editOpen, setEditOpen] = useState(false);
-	const [showToast, setShowToast] = useState(false);
+	const [showToast, setShowToast] = useState({ open: false });
 
 	const { data, isLoading, isError, error } = useQuery({
 		queryKey: ["soldiers", "table"],

@@ -13,39 +13,43 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-export default function RowActions({
-	row,
-	onEdit,
-	onDelete,
-	type,
-	setShowToast,
-}) {
+export default function RowActions({ row, onEdit, onDelete, type }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const isDuty = type === "duty";
+	const isScheduled = row.original?.status === "scheduled";
 
 	return (
 		<>
 			<Stack direction="row" spacing={1}>
-				<Tooltip title="Edit">
-					<IconButton size="small" onClick={() => onEdit(row)}>
-						<EditIcon fontSize="small" />
-					</IconButton>
+				<Tooltip
+					title={isScheduled ? "Scheduled duties cannot be edited" : "Edit"}
+				>
+					<span>
+						<IconButton
+							size="small"
+							onClick={() => onEdit(row)}
+							disabled={isScheduled}
+						>
+							<EditIcon fontSize="small" />
+						</IconButton>
+					</span>
 				</Tooltip>
 
-				<Tooltip title="Delete">
-					<IconButton
-						size="small"
-						disabled={row.original?.status === "scheduled"}
-						color="error"
-						onClick={() => {
-							setIsOpen(true);
-						}}
-					>
-						<DeleteIcon fontSize="small" />
-					</IconButton>
+				<Tooltip
+					title={isScheduled ? "Scheduled duties cannot be deleted" : "Delete"}
+				>
+					<span>
+						<IconButton
+							size="small"
+							disabled={isScheduled}
+							color="error"
+							onClick={() => setIsOpen(true)}
+						>
+							<DeleteIcon fontSize="small" />
+						</IconButton>
+					</span>
 				</Tooltip>
 			</Stack>
-
 			<Dialog
 				open={isOpen}
 				onClose={() => {
@@ -58,7 +62,7 @@ export default function RowActions({
 
 				<DialogContent sx={{ textAlign: "center" }}>
 					<DialogContentText>
-						you are going to delete {isDuty ? "duty " : "soldier "}
+						You are going to delete {isDuty ? "duty " : "soldier "}
 						{row.original?._id}
 					</DialogContentText>
 				</DialogContent>
@@ -70,7 +74,6 @@ export default function RowActions({
 						onClick={() => {
 							onDelete(row);
 							setIsOpen(false);
-							setShowToast(true);
 						}}
 						variant="contained"
 						color="error"
