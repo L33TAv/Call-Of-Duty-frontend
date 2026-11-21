@@ -190,12 +190,16 @@ export default function DutiesPage() {
 					</Typography>
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 						<strong>Start Time:</strong>{" "}
-						{new Date(selectedDuty?.startTime).toLocaleString() || "Unknown"}
+						{selectedDuty?.startTime
+							? new Date(selectedDuty?.startTime).toLocaleString()
+							: "Unknown"}
 					</Typography>
 
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 						<strong>End Time:</strong>{" "}
-						{new Date(selectedDuty?.endTime).toLocaleString() || "Unknown"}
+						{selectedDuty?.endTime
+							? new Date(selectedDuty?.endTime).toLocaleString()
+							: "Unknown"}
 					</Typography>
 
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -216,12 +220,16 @@ export default function DutiesPage() {
 
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 						<strong>Minimum Rank:</strong>{" "}
-						{selectedDuty?.minRank || " Not assigned"}
+						{selectedDuty?.minRank ?? " Not assigned"}
 					</Typography>
 
 					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
 						<strong>Maximum Rank:</strong>{" "}
-						{selectedDuty?.maxRank || " Not assigned"}
+						{selectedDuty?.maxRank ?? " Not assigned"}
+					</Typography>
+
+					<Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+						<strong>status:</strong> {selectedDuty?.status ?? " Not assigned"}
 					</Typography>
 				</DialogContent>
 				<DialogActions>

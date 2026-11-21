@@ -231,11 +231,12 @@ const SoldierFormDialog = ({
 
 									const parsedLimitation = value
 										.split(",")
-										.map((item) => item.trim())
+										.map((item) => item.trim().toLowerCase())
 										.filter((item) => item !== "");
 
-									return parsedLimitation.length > 0
-										? parsedLimitation
+									const uniqueItems = [...new Set(parsedLimitation)];
+									return uniqueItems.length > 0
+										? uniqueItems
 										: isEdit
 											? []
 											: undefined;
@@ -251,7 +252,11 @@ const SoldierFormDialog = ({
 						color="primary"
 						disabled={addMutation.isPending}
 					>
-						{addMutation.isPending ? "Creating..." : "Submit"}
+						{addMutation.isPending
+							? isEdit
+								? "Saving..."
+								: "Creating..."
+							: "Submit"}
 					</Button>
 					<Button onClick={handleClose} color="inherit">
 						Cancel
@@ -360,7 +365,7 @@ const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 
 	return (
 		<Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-			<DialogTitle>Add a New Duty</DialogTitle>
+			<DialogTitle>{isEdit ? "Edit Duty" : "Add a New Duty"}</DialogTitle>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<DialogContent>
 					<Stack spacing={3}>
@@ -482,7 +487,7 @@ const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 
 									const parsedConstraints = value
 										.split(",")
-										.map((item) => item.trim())
+										.map((item) => item.trim().toLowerCase())
 										.filter((item) => item !== "");
 
 									const uniqueItems = [...new Set(parsedConstraints)];
@@ -581,7 +586,7 @@ const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 							type="number"
 							slotProps={{
 								htmlInput: {
-									min: 1,
+									min: 0,
 									max: 6,
 									step: 1,
 								},
@@ -590,8 +595,9 @@ const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 								setValueAs: (value) =>
 									value === "" || value === null ? undefined : Number(value),
 								validate: (value) => {
+									if (value === undefined) return true;
 									if (value < 0 || value > 6) {
-										return "value must be between 1 to 6.";
+										return "value must be between 0 to 6.";
 									}
 
 									return true;
@@ -607,7 +613,7 @@ const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 							type="number"
 							slotProps={{
 								htmlInput: {
-									min: 1,
+									min: 0,
 									max: 6,
 									step: 1,
 								},
@@ -616,8 +622,9 @@ const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 								setValueAs: (value) =>
 									value === "" || value === null ? undefined : Number(value),
 								validate: (value, formValues) => {
+									if (value === undefined) return true;
 									if (value < 0 || value > 6) {
-										return "value must be between 1 to 6.";
+										return "value must be between 0 to 6.";
 									}
 
 									if (value < formValues.minRank) {
@@ -639,7 +646,11 @@ const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 						color="primary"
 						disabled={addMutation.isPending}
 					>
-						{addMutation.isPending ? "Creating..." : "Submit"}
+						{addMutation.isPending
+							? isEdit
+								? "Saving..."
+								: "Creating..."
+							: "Submit"}
 					</Button>
 					<Button onClick={handleClose} color="inherit">
 						Cancel
