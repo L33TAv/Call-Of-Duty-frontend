@@ -1,6 +1,6 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
-import { DutiesTable, SoldiersTable } from "../components/tables";
+import { ResourceTable } from "../components/Tables";
 
 export default function AdminPage() {
 	const [tab, setTab] = useState(0);
@@ -26,8 +26,7 @@ export default function AdminPage() {
 					overflowX: "auto",
 				}}
 			>
-				{tab === 0 && <SoldiersTable />}
-				{tab === 1 && <DutiesTable />}
+				<ResourceTable key={tab} type={tab === 0 ? "soldier" : "duty"} />
 			</Box>
 		</Box>
 	);

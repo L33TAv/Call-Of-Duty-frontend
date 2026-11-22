@@ -1,8 +1,8 @@
 import AddIcon from "@mui/icons-material/Add";
 import { Button } from "@mui/material";
 import { useState } from "react";
-import FeedbackSnackbar from "./FeedbackSnackbar";
-import { DutyFormDialog } from "./FormDialog";
+import FeedbackSnackbar from "../components/FeedbackSnackbar";
+import { DutyFormDialog } from "./DutyFormDialog";
 
 const AddDutiesButton = () => {
 	const [open, setOpen] = useState(false);

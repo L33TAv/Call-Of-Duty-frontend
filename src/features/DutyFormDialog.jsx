@@ -5,7 +5,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	MenuItem,
 	Stack,
 	TextField,
 } from "@mui/material";
@@ -13,24 +12,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { patchDuty, postDuty } from "../api/duties";
-import { patchSoldier, postSoldier } from "../api/soldiers";
-
-const RANK_NAMES = [
-	"private",
-	"corporal",
-	"sergeant",
-	"lieutenant",
-	"captain",
-	"major",
-	"colonel",
-];
-
-const EMPTY_SOLDIER_VALUES = {
-	_id: "",
-	name: "",
-	rankName: "",
-	limitations: "",
-};
 
 const EMPTY_DUTY_VALUES = {
 	name: "",

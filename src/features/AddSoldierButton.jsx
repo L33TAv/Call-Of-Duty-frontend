@@ -1,8 +1,8 @@
 import AddIcon from "@mui/icons-material/Add";
 import { Button } from "@mui/material";
 import { useState } from "react";
-import FeedbackSnackbar from "./FeedbackSnackbar";
-import { SoldierFormDialog } from "./FormDialog";
+import FeedbackSnackbar from "../components/FeedbackSnackbar";
+import { SoldierFormDialog } from "./SoldierFormDialog";
 
 const AddSoldierButton = () => {
 	const [open, setOpen] = useState(false);
