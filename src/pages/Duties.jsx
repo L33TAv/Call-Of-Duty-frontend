@@ -240,24 +240,29 @@ export default function DutiesPage() {
 							</Typography>
 						</DialogContent>
 						<DialogActions>
-							<Button
-								color="info"
-								onClick={() => {
-									setOpen(true);
-								}}
-								disabled={open}
-							>
-								Edit
-							</Button>
-							<Button
-								color="error"
-								onClick={() => {
-									onDelete(selectedDuty._id);
-								}}
-								disabled={deleteMutation.isPending}
-							>
-								{deleteMutation.isPending ? "Deleting..." : "Delete"}
-							</Button>
+							{selectedDuty.status !== "scheduled" && (
+								<Button
+									color="info"
+									onClick={() => {
+										setOpen(true);
+									}}
+									disabled={open}
+								>
+									Edit
+								</Button>
+							)}
+
+							{selectedDuty.status !== "scheduled" && (
+								<Button
+									color="error"
+									onClick={() => {
+										onDelete(selectedDuty._id);
+									}}
+									disabled={deleteMutation.isPending}
+								>
+									{deleteMutation.isPending ? "Deleting..." : "Delete"}
+								</Button>
+							)}
 							<Button
 								onClick={() =>
 									setSelectedDuty({ ...selectedDuty, open: false })
