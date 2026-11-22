@@ -18,12 +18,12 @@ import {
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { deleteSoldier, fetchSoldiers } from "../api/soldiers";
-import AddSoldierButton from "../components/AddSoldierButton";
 import { SoldierCard } from "../components/Card";
 import FeedbackSnackbar from "../components/FeedbackSnackbar";
-import { SoldierFormDialog } from "../components/FormDialog";
 import LoadingSpinner from "../components/LoadingSpinner";
 import SearchBar from "../components/SearchBar";
+import AddSoldierButton from "../features/AddSoldierButton";
+import { SoldierFormDialog } from "../features/SoldierFormDialog";
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
 
 const PAGE_SIZE = 15;
