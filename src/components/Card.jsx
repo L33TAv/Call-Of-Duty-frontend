@@ -147,7 +147,7 @@ const DutyCard = ({ duty, onSelect }) => {
 				<Stack spacing={0.5}>
 					<Typography>Description: {duty.description || "unknown"}</Typography>
 					<Typography>
-						Location: {duty.location?.coordinates.join(",") || "Unknown"}
+						Location: {duty.location?.coordinates?.join(",") || "Unknown"}
 					</Typography>
 				</Stack>
 			</CardContent>
