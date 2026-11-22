@@ -15,8 +15,16 @@ export const postSoldier = async (soldier) => {
 	return response.json();
 };
 
-export const fetchSoldiers = async ({ pageParam = 1, pageSize }) => {
-	const response = await fetch(`/soldiers?page=${pageParam}&limit=${pageSize}`);
+export const fetchSoldiers = async ({ pageParam = 1, pageSize, name }) => {
+	const params = new URLSearchParams({
+		page: pageParam,
+		limit: pageSize,
+	});
+	if (name?.trim()) {
+		params.set("name", name.trim());
+	}
+
+	const response = await fetch(`/soldiers?${params}`);
 
 	if (!response.ok) throw new Error("Network response was not ok");
 

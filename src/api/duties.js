@@ -1,5 +1,13 @@
-export const fetchDuties = async ({ pageParam = 1, pageSize }) => {
-	const response = await fetch(`/duties?page=${pageParam}&limit=${pageSize}`);
+export const fetchDuties = async ({ pageParam = 1, pageSize, name }) => {
+	const params = new URLSearchParams({
+		page: pageParam,
+		limit: pageSize,
+	});
+	if (name?.trim()) {
+		params.set("name", name.trim());
+	}
+
+	const response = await fetch(`/duties?${params}`);
 
 	if (!response.ok) throw new Error("Network response was not ok");
 
