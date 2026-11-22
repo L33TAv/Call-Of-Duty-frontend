@@ -6,35 +6,36 @@ import {
 	TableCell,
 	TableContainer,
 	TableHead,
-	TablePagination,
 	TableRow,
 	Typography,
 } from "@mui/material";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-	createPaginatedRowModel,
+	useInfiniteQuery,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
+import {
 	createSortedRowModel,
-	rowPaginationFeature,
 	rowSortingFeature,
 	tableFeatures,
 	useTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { deleteDuty, fetchDuties } from "../api/duties";
 import { deleteSoldier, fetchSoldiers } from "../api/soldiers";
 import { DutyFormDialog } from "../features/DutyFormDialog";
 import { SoldierFormDialog } from "../features/SoldierFormDialog";
 import { dutiesColumns, soldiersColumns } from "../features/TableColumns";
+import useInfiniteScroll from "../hooks/useInfiniteScroll";
 import FeedbackSnackbar from "./FeedbackSnackbar";
 import LoadingSpinner from "./LoadingSpinner";
+
+const PAGE_SIZE = 15;
 
 const features = tableFeatures({
 	rowSortingFeature,
 	sortedRowModel: createSortedRowModel(),
-
-	rowPaginationFeature,
-	paginatedRowModel: createPaginatedRowModel(),
 });
 
 function DataTable({ columns, data = [], meta }) {
@@ -103,25 +104,6 @@ function DataTable({ columns, data = [], meta }) {
 					</TableBody>
 				</Table>
 			</TableContainer>
-			<TablePagination
-				component="div"
-				sx={{
-					borderTop: 1,
-					borderColor: "divider",
-					"& .MuiTablePagination-spacer": { display: "none" },
-					"& .MuiTablePagination-toolbar": { justifyContent: "center" },
-				}}
-				count={table.getRowCount()}
-				page={table.state.pagination.pageIndex}
-				rowsPerPage={table.state.pagination.pageSize}
-				onPageChange={(_, newPage) => {
-					table.setPageIndex(newPage);
-				}}
-				onRowsPerPageChange={(event) => {
-					table.setPageSize(Number(event.target.value));
-				}}
-				rowsPerPageOptions={[5, 10, 25, 50]}
-			/>
 		</Paper>
 	);
 }
@@ -135,14 +117,28 @@ export function ResourceTable({ type }) {
 	const [editOpen, setEditOpen] = useState(false);
 	const [showToast, setShowToast] = useState({ open: false });
 
-	const { data, isLoading, isError, error } = useQuery({
+	const {
+		data,
+		isLoading,
+		isError,
+		error,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+	} = useInfiniteQuery({
 		queryKey: [resourceKey, "table"],
-		queryFn: () => {
+		queryFn: ({ pageParam }) => {
 			if (isSoldierTable) {
-				return fetchSoldiers({ pageParam: 1, pageSize: 100 });
+				return fetchSoldiers({ pageParam, pageSize: PAGE_SIZE });
 			}
 
-			return fetchDuties({ pageParam: 1, pageSize: 100 });
+			return fetchDuties({ pageParam, pageSize: PAGE_SIZE });
+		},
+		initialPageParam: 1,
+		getNextPageParam: (lastPage, allPages) => {
+			if (lastPage.length < PAGE_SIZE) return undefined;
+
+			return allPages.length + 1;
 		},
 	});
 
@@ -173,6 +169,14 @@ export function ResourceTable({ type }) {
 		},
 	});
 
+	const loadMoreRef = useInfiniteScroll({
+		hasNextPage,
+		isFetchingNextPage,
+		fetchNextPage,
+	});
+
+	const flattenedData = useMemo(() => data?.pages?.flat() ?? [], [data]);
+
 	if (isLoading) return <LoadingSpinner />;
 	if (isError)
 		return (
@@ -184,7 +188,7 @@ export function ResourceTable({ type }) {
 	return (
 		<>
 			<DataTable
-				data={data}
+				data={flattenedData}
 				columns={isSoldierTable ? soldiersColumns : dutiesColumns}
 				meta={{
 					onEdit: (row) => {
@@ -194,6 +198,10 @@ export function ResourceTable({ type }) {
 					onDelete: (row) => deleteMutation.mutate(row.original._id),
 				}}
 			/>
+
+			{isFetchingNextPage && <LoadingSpinner />}
+
+			<div ref={loadMoreRef} style={{ height: "20px", visibility: "hidden" }} />
 
 			{isSoldierTable ? (
 				<SoldierFormDialog
