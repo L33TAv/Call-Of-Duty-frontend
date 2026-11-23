@@ -3,13 +3,10 @@ import { createHashRouter, RouterProvider } from "react-router";
 import MainLayout from "./layouts/MainLayout";
 import AdminPage from "./pages/Admin";
 import DutiesPage from "./pages/Duties";
+import Home from "./pages/Home";
 import SoldiersPage from "./pages/Soldiers";
 
 const queryClient = new QueryClient();
-
-function Home() {
-	return <h1>Welcome to home page!</h1>;
-}
 
 const router = createHashRouter([
 	{
