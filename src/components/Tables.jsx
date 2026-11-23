@@ -21,7 +21,8 @@ import {
 	tableFeatures,
 	useTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useMemo, useRef, useState } from "react";
 import { deleteDuty, fetchDuties } from "../api/duties";
 import { deleteSoldier, fetchSoldiers } from "../api/soldiers";
 import { DutyFormDialog } from "../features/DutyFormDialog";
@@ -38,13 +39,40 @@ const features = tableFeatures({
 	sortedRowModel: createSortedRowModel(),
 });
 
-function DataTable({ columns, data = [], meta }) {
+function DataTable({
+	columns,
+	data = [],
+	meta,
+	tableContainerRef,
+	loadMoreRef,
+}) {
 	const table = useTable({ features, columns, data, meta });
+
+	const rows = table.getRowModel().rows;
+
+	const rowVirtualizer = useVirtualizer({
+		count: rows.length,
+		getScrollElement: () => tableContainerRef.current,
+		estimateSize: () => 75,
+		overscan: 5,
+	});
+
+	const virtualRows = rowVirtualizer.getVirtualItems();
+
+	const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+
+	const paddingBottom =
+		virtualRows.length > 0
+			? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
+			: 0;
 
 	return (
 		<Paper variant="outlined">
-			<TableContainer>
-				<Table sx={{ width: "100%" }}>
+			<TableContainer
+				ref={tableContainerRef}
+				sx={{ maxHeight: 500, overflowY: "auto" }}
+			>
+				<Table stickyHeader sx={{ width: "100%" }}>
 					<TableHead>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow
@@ -80,6 +108,15 @@ function DataTable({ columns, data = [], meta }) {
 					</TableHead>
 
 					<TableBody>
+						{paddingTop > 0 && (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									sx={{ height: paddingTop, padding: 0, border: 0 }}
+								/>
+							</TableRow>
+						)}
+
 						{table.getRowModel().rows.length === 0 ? (
 							<TableRow>
 								<TableCell
@@ -91,18 +128,35 @@ function DataTable({ columns, data = [], meta }) {
 								</TableCell>
 							</TableRow>
 						) : (
-							table.getRowModel().rows.map((row) => (
-								<TableRow hover key={row.id}>
-									{row.getAllCells().map((cell) => (
-										<TableCell key={cell.id}>
-											<table.FlexRender cell={cell} />
-										</TableCell>
-									))}
-								</TableRow>
-							))
+							virtualRows.map((virtualRow) => {
+								const row = rows[virtualRow.index];
+
+								return (
+									<TableRow hover key={row.id}>
+										{row.getAllCells().map((cell) => (
+											<TableCell key={cell.id}>
+												<table.FlexRender cell={cell} />
+											</TableCell>
+										))}
+									</TableRow>
+								);
+							})
+						)}
+
+						{paddingBottom > 0 && (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									sx={{ height: paddingBottom, padding: 0, border: 0 }}
+								/>
+							</TableRow>
 						)}
 					</TableBody>
 				</Table>
+				<div
+					ref={loadMoreRef}
+					style={{ height: "20px", visibility: "hidden" }}
+				/>
 			</TableContainer>
 		</Paper>
 	);
@@ -116,6 +170,7 @@ export function ResourceTable({ type }) {
 	const [editingTask, setEditingTask] = useState({ open: false });
 	const [editOpen, setEditOpen] = useState(false);
 	const [showToast, setShowToast] = useState({ open: false });
+	const tableContainerRef = useRef(null);
 
 	const {
 		data,
@@ -173,6 +228,7 @@ export function ResourceTable({ type }) {
 		hasNextPage,
 		isFetchingNextPage,
 		fetchNextPage,
+		rootRef: tableContainerRef,
 	});
 
 	const flattenedData = useMemo(() => data?.pages?.flat() ?? [], [data]);
@@ -197,11 +253,11 @@ export function ResourceTable({ type }) {
 					},
 					onDelete: (row) => deleteMutation.mutate(row.original._id),
 				}}
+				tableContainerRef={tableContainerRef}
+				loadMoreRef={loadMoreRef}
 			/>
 
 			{isFetchingNextPage && <LoadingSpinner />}
-
-			<div ref={loadMoreRef} style={{ height: "20px", visibility: "hidden" }} />
 
 			{isSoldierTable ? (
 				<SoldierFormDialog

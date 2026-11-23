@@ -4,6 +4,7 @@ export default function useInfiniteScroll({
 	hasNextPage,
 	isFetchingNextPage,
 	fetchNextPage,
+	rootRef,
 }) {
 	const loadMoreRef = useRef(null);
 
@@ -14,7 +15,7 @@ export default function useInfiniteScroll({
 					fetchNextPage();
 				}
 			},
-			{ threshold: 0.5, rootMargin: "200px" },
+			{ root: rootRef?.current, threshold: 0.5, rootMargin: "200px" },
 		);
 
 		if (loadMoreRef.current) {
@@ -22,7 +23,7 @@ export default function useInfiniteScroll({
 		}
 
 		return () => observer.disconnect();
-	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage, rootRef]);
 
 	return loadMoreRef;
 }
