@@ -1,5 +1,6 @@
 import {
 	Alert,
+	CircularProgress,
 	Paper,
 	Table,
 	TableBody,
@@ -45,6 +46,7 @@ function DataTable({
 	meta,
 	tableContainerRef,
 	loadMoreRef,
+	isFetchingNextPage,
 }) {
 	const table = useTable({ features, columns, data, meta });
 
@@ -132,7 +134,12 @@ function DataTable({
 								const row = rows[virtualRow.index];
 
 								return (
-									<TableRow hover key={row.id}>
+									<TableRow
+										hover
+										key={row.original._id}
+										ref={rowVirtualizer.measureElement}
+										data-index={virtualRow.index}
+									>
 										{row.getAllCells().map((cell) => (
 											<TableCell key={cell.id}>
 												<table.FlexRender cell={cell} />
@@ -149,6 +156,18 @@ function DataTable({
 									colSpan={columns.length}
 									sx={{ height: paddingBottom, padding: 0, border: 0 }}
 								/>
+							</TableRow>
+						)}
+
+						{isFetchingNextPage && (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									align="center"
+									sx={{ py: 1.5, border: 0 }}
+								>
+									<CircularProgress size={24} />
+								</TableCell>
 							</TableRow>
 						)}
 					</TableBody>
@@ -255,9 +274,8 @@ export function ResourceTable({ type }) {
 				}}
 				tableContainerRef={tableContainerRef}
 				loadMoreRef={loadMoreRef}
+				isFetchingNextPage={isFetchingNextPage}
 			/>
-
-			{isFetchingNextPage && <LoadingSpinner />}
 
 			{isSoldierTable ? (
 				<SoldierFormDialog
