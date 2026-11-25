@@ -1,10 +1,21 @@
-export const fetchDuties = async ({ pageParam = 1, pageSize, name }) => {
+export const fetchDuties = async ({
+	pageParam = 1,
+	pageSize,
+	name,
+	sortBy,
+	sortOrder = "asc",
+}) => {
 	const params = new URLSearchParams({
 		page: pageParam,
 		limit: pageSize,
 	});
 	if (name?.trim()) {
 		params.set("name", name.trim());
+	}
+
+	if (sortBy) {
+		params.set("sortBy", sortBy);
+		params.set("sortOrder", sortOrder);
 	}
 
 	const response = await fetch(`/duties?${params}`);
