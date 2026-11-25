@@ -15,11 +15,11 @@ import {
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-export default function NavBar() {
-	const [isOpen, setOpen] = useState(false);
+const NavBar = () => {
+	const [isOpen, setIsOpen] = useState(false);
 
 	function handleDrawerToggle() {
-		setOpen(!isOpen);
+		setIsOpen(!isOpen);
 	}
 
 	return (
@@ -103,4 +103,6 @@ export default function NavBar() {
 			</Toolbar>
 		</AppBar>
 	);
-}
+};
+
+export default NavBar;
