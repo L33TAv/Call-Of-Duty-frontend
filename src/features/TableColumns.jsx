@@ -119,10 +119,13 @@ export const dutiesColumns = [
 		header: "Description",
 	},
 	{
+		id: "location.type",
 		accessorKey: "location.type",
 		header: "Location Type",
+		enableSorting: false,
 	},
 	{
+		id: "location.coordinates",
 		accessorKey: "location.coordinates",
 		header: "Coordinates",
 		cell: (info) => info.getValue()?.join(", "),
@@ -143,7 +146,7 @@ export const dutiesColumns = [
 		accessorKey: "constraints",
 		header: "Constraints",
 		cell: (info) => <LabelByChips info={info} />,
-		sortingFn: sortByItemCount,
+		enableSorting: false,
 	},
 	{
 		accessorKey: "soldiersRequired",
@@ -167,6 +170,7 @@ export const dutiesColumns = [
 		accessorKey: "soldiers",
 		header: "Soldiers",
 		cell: (info) => info.getValue()?.length ?? 0,
+		enableSorting: false,
 	},
 	{
 		accessorKey: "status",
@@ -178,6 +182,7 @@ export const dutiesColumns = [
 		cell: (info) => {
 			return <ShowHistory info={info} />;
 		},
+		enableSorting: false,
 	},
 	{
 		accessorKey: "createdAt",
