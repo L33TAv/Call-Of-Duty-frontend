@@ -1,0 +1,72 @@
+export const fetchDuties = async ({
+	pageParam = 1,
+	pageSize,
+	name,
+	sortBy,
+	sortOrder = "asc",
+}) => {
+	const params = new URLSearchParams({
+		page: pageParam,
+		limit: pageSize,
+	});
+	if (name?.trim()) {
+		params.set("name", name.trim());
+	}
+
+	if (sortBy) {
+		params.set("sortBy", sortBy);
+		params.set("sortOrder", sortOrder);
+	}
+
+	const response = await fetch(`/duties?${params}`);
+
+	if (!response.ok) throw new Error("Network response was not ok");
+
+	return response.json();
+};
+
+export const postDuty = async (duty) => {
+	const response = await fetch("/duties/", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(duty),
+	});
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
+	}
+	return response.json();
+};
+
+export const deleteDuty = async (dutyId) => {
+	const response = await fetch(`/duties/${dutyId}`, {
+		method: "DELETE",
+	});
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
+	}
+};
+
+export const patchDuty = async ({ dutyId, newDuty }) => {
+	const response = await fetch(`/duties/${dutyId}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(newDuty),
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => null);
+		throw new Error(
+			errorData?.message || "Server error occurred. Please try again.",
+		);
+	}
+};
