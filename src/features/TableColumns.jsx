@@ -13,11 +13,6 @@ import RowActions from "../components/RowActions";
 const hasNoItems = (items) =>
 	!items?.length || items[0]?.toLowerCase() === "none";
 
-const getItemCount = (items) => (hasNoItems(items) ? 0 : items.length);
-
-const sortByItemCount = (rowA, rowB, columnId) =>
-	getItemCount(rowA.getValue(columnId)) - getItemCount(rowB.getValue(columnId));
-
 const LabelByChips = ({ info }) => {
 	const limits = info.getValue() ?? [];
 
@@ -225,9 +220,10 @@ export const soldiersColumns = [
 		accessorFn: (row) => row.limitations ?? [],
 		header: "Limitations",
 		cell: (info) => <LabelByChips info={info} />,
-		sortingFn: sortByItemCount,
+		enableSorting: false,
 	},
 	{
+		id: "rank.name",
 		accessorKey: "rank.name",
 		header: "Rank name",
 	},

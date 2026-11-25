@@ -15,13 +15,24 @@ export const postSoldier = async (soldier) => {
 	return response.json();
 };
 
-export const fetchSoldiers = async ({ pageParam = 1, pageSize, name }) => {
+export const fetchSoldiers = async ({
+	pageParam = 1,
+	pageSize,
+	name,
+	sortBy,
+	sortOrder = "asc",
+}) => {
 	const params = new URLSearchParams({
 		page: pageParam,
 		limit: pageSize,
 	});
 	if (name?.trim()) {
 		params.set("name", name.trim());
+	}
+
+	if (sortBy) {
+		params.set("sortBy", sortBy);
+		params.set("sortOrder", sortOrder);
 	}
 
 	const response = await fetch(`/soldiers?${params}`);
