@@ -1,5 +1,6 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
+import DutiesMap from "../components/DutiesMap";
 import { ResourceTable } from "../components/Tables";
 
 export default function AdminPage() {
@@ -27,6 +28,8 @@ export default function AdminPage() {
 				}}
 			>
 				<ResourceTable key={tab} type={tab === 0 ? "soldier" : "duty"} />
+
+				{tab === 1 && <DutiesMap />}
 			</Box>
 		</Box>
 	);
