@@ -17,7 +17,6 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import {
-	createSortedRowModel,
 	rowSortingFeature,
 	tableFeatures,
 	useTable,
@@ -35,10 +34,7 @@ import LoadingSpinner from "./LoadingSpinner";
 
 const PAGE_SIZE = 15;
 
-const features = tableFeatures({
-	rowSortingFeature,
-	sortedRowModel: createSortedRowModel(),
-});
+const features = tableFeatures({ rowSortingFeature });
 
 function DataTable({
 	columns,
@@ -47,8 +43,20 @@ function DataTable({
 	tableContainerRef,
 	loadMoreRef,
 	isFetchingNextPage,
+	sorting,
+	onSortingChange,
 }) {
-	const table = useTable({ features, columns, data, meta });
+	const table = useTable({
+		features,
+		columns,
+		data,
+		meta,
+		manualSorting: true,
+		state: {
+			sorting,
+		},
+		onSortingChange,
+	});
 
 	const rows = table.getRowModel().rows;
 
@@ -191,6 +199,10 @@ export function ResourceTable({ type }) {
 	const [showToast, setShowToast] = useState({ open: false });
 	const tableContainerRef = useRef(null);
 
+	const [sorting, setSorting] = useState([]);
+
+	const currentSort = sorting[0];
+
 	const {
 		data,
 		isLoading,
@@ -200,13 +212,25 @@ export function ResourceTable({ type }) {
 		fetchNextPage,
 		isFetchingNextPage,
 	} = useInfiniteQuery({
-		queryKey: [resourceKey, "table"],
+		queryKey: [resourceKey, "table", sorting],
 		queryFn: ({ pageParam }) => {
+			const sortBy = currentSort?.id;
+			const sortOrder = currentSort
+				? currentSort.desc
+					? "desc"
+					: "asc"
+				: undefined;
+
 			if (isSoldierTable) {
-				return fetchSoldiers({ pageParam, pageSize: PAGE_SIZE });
+				return fetchSoldiers({
+					pageParam,
+					pageSize: PAGE_SIZE,
+					sortBy,
+					sortOrder,
+				});
 			}
 
-			return fetchDuties({ pageParam, pageSize: PAGE_SIZE });
+			return fetchDuties({ pageParam, pageSize: PAGE_SIZE, sortBy, sortOrder });
 		},
 		initialPageParam: 1,
 		getNextPageParam: (lastPage, allPages) => {
@@ -275,6 +299,8 @@ export function ResourceTable({ type }) {
 				tableContainerRef={tableContainerRef}
 				loadMoreRef={loadMoreRef}
 				isFetchingNextPage={isFetchingNextPage}
+				sorting={sorting}
+				onSortingChange={setSorting}
 			/>
 
 			{isSoldierTable ? (
