@@ -25,6 +25,14 @@ export const fetchDuties = async ({
 	return response.json();
 };
 
+export const fetchAllDuties = async () => {
+	const response = await fetch(`/duties`);
+
+	if (!response.ok) throw new Error("Network response was not ok");
+
+	return response.json();
+};
+
 export const postDuty = async (duty) => {
 	const response = await fetch("/duties/", {
 		method: "POST",
