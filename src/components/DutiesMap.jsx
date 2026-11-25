@@ -1,22 +1,35 @@
-import TileLayer from "ol/layer/Tile.js";
-import OlMap from "ol/Map.js";
-import OSM from "ol/source/OSM.js";
-import View from "ol/View.js";
-import { useEffect, useRef } from "react";
-import "ol/ol.css";
-import { Box } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+	Box,
+	Chip,
+	Divider,
+	IconButton,
+	Stack,
+	Typography,
+} from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import Feature from "ol/Feature.js";
 import Point from "ol/geom/Point.js";
+import TileLayer from "ol/layer/Tile.js";
 import VectorLayer from "ol/layer/Vector.js";
+import OlMap from "ol/Map.js";
+import "ol/ol.css";
+import Overlay from "ol/Overlay.js";
 import { fromLonLat } from "ol/proj.js";
+import OSM from "ol/source/OSM.js";
 import VectorSource from "ol/source/Vector.js";
+import View from "ol/View.js";
+import { useEffect, useRef, useState } from "react";
 import { fetchAllDuties } from "../api/duties";
 
 export default function DutiesMap() {
 	const mapElementRef = useRef(null);
 	const mapRef = useRef(null);
 	const locationsSourceRef = useRef(null);
+
+	const popupRef = useRef(null);
+	const [selectedFeature, setSelectedFeature] = useState(null);
+	console.log(selectedFeature);
 
 	const { data, isLoading, isError, error } = useQuery({
 		queryKey: ["duties", "locations"],
@@ -55,8 +68,33 @@ export default function DutiesMap() {
 			}),
 		});
 
+		const overlay = new Overlay({
+			element: popupRef.current,
+			positioning: "bottom-center",
+			offset: [0, -15],
+			autoPan: true,
+		});
+
+		map.addOverlay(overlay);
+
 		mapRef.current = map;
 		locationsSourceRef.current = locationsSource;
+
+		map.on("singleclick", (event) => {
+			const feature = map.forEachFeatureAtPixel(
+				event.pixel,
+				(feature) => feature,
+			);
+
+			if (!feature) {
+				setSelectedFeature(null);
+				overlay.setPosition(undefined);
+				return;
+			}
+
+			setSelectedFeature(feature.getProperties());
+			overlay.setPosition(event.coordinate);
+		});
 
 		return () => {
 			map.setTarget(undefined);
@@ -71,15 +109,15 @@ export default function DutiesMap() {
 
 		if (!source || !map || !Array.isArray(data)) return;
 
-		console.log(data);
-
 		const features = data
 			.filter((duty) => duty.location?.coordinates)
 			.map((duty) => {
 				return new Feature({
 					geometry: new Point(fromLonLat(duty.location.coordinates)),
-					name: duty.name,
-					status: duty.status ?? "",
+					name: duty.name ?? "unknown",
+					status: duty.status ?? "unknown",
+					description: duty.description ?? "unknown",
+					_id: duty._id ?? "unknown",
 				});
 			});
 
@@ -109,6 +147,82 @@ export default function DutiesMap() {
 					Error loading the points: {error.message}
 				</Box>
 			)}
+
+			<div ref={popupRef} className="map-popup">
+				{selectedFeature && (
+					<Box
+						sx={{
+							bgcolor: "background.paper",
+							color: "text.primary",
+							p: 2,
+							borderRadius: 2.5,
+							minWidth: 220,
+							maxWidth: 280,
+							border: 1,
+							borderColor:
+								selectedFeature.status === "scheduled"
+									? "primary.main"
+									: "error.main",
+							boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+						}}
+					>
+						<Stack spacing={1}>
+							<Stack
+								direction="row"
+								justifyContent="space-between"
+								alignItems="flex-start"
+								spacing={1}
+							>
+								<Typography
+									variant="subtitle1"
+									sx={{
+										fontWeight: 700,
+										lineHeight: 1.3,
+										wordBreak: "break-word",
+									}}
+								>
+									{selectedFeature.name}
+								</Typography>
+								<IconButton
+									size="small"
+									aria-label="Close popup"
+									onClick={() => setSelectedFeature(null)}
+									sx={{ mt: -0.5, mr: -0.5, color: "text.secondary" }}
+								>
+									<CloseIcon fontSize="small" />
+								</IconButton>
+							</Stack>
+
+							<Chip
+								label={selectedFeature.status}
+								size="small"
+								color={
+									selectedFeature.status === "scheduled" ? "primary" : "error"
+								}
+								sx={{
+									width: "fit-content",
+									height: 22,
+									fontSize: "0.7rem",
+									textTransform: "capitalize",
+								}}
+							/>
+
+							<Divider />
+
+							<Typography variant="caption" color="text.secondary">
+								<strong>ID:</strong> {selectedFeature._id}
+							</Typography>
+							<Typography
+								variant="body2"
+								color="text.secondary"
+								sx={{ wordBreak: "break-word" }}
+							>
+								Description: {selectedFeature.description}
+							</Typography>
+						</Stack>
+					</Box>
+				)}
+			</div>
 		</Box>
 	);
 }
