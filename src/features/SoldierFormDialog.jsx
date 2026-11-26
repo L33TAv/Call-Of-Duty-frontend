@@ -31,13 +31,13 @@ const EMPTY_SOLDIER_VALUES = {
 	limitations: "",
 };
 
-export function SoldierFormDialog({
+const SoldierFormDialog = ({
 	open,
 	soldier,
 	setShowToast,
 	setSoldier,
 	setOpen,
-}) {
+}) => {
 	const isEdit = Boolean(soldier?._id);
 
 	const {
@@ -241,4 +241,6 @@ export function SoldierFormDialog({
 			</form>
 		</Dialog>
 	);
-}
+};
+
+export { SoldierFormDialog };

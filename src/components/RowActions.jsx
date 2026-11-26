@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-export default function RowActions({ row, onEdit, onDelete, type }) {
+const RowActions = ({ row, onEdit, onDelete, type }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const isDuty = type === "duty";
 	const isScheduled = row.original?.status === "scheduled";
@@ -85,4 +85,6 @@ export default function RowActions({ row, onEdit, onDelete, type }) {
 			</Dialog>
 		</>
 	);
-}
+};
+
+export default RowActions;

@@ -36,7 +36,7 @@ const PAGE_SIZE = 15;
 
 const features = tableFeatures({ rowSortingFeature });
 
-function DataTable({
+const DataTable = ({
 	columns,
 	data = [],
 	meta,
@@ -45,7 +45,7 @@ function DataTable({
 	isFetchingNextPage,
 	sorting,
 	onSortingChange,
-}) {
+}) => {
 	const table = useTable({
 		features,
 		columns,
@@ -187,9 +187,9 @@ function DataTable({
 			</TableContainer>
 		</Paper>
 	);
-}
+};
 
-export function ResourceTable({ type }) {
+const ResourceTable = ({ type }) => {
 	const queryClient = useQueryClient();
 	const isSoldierTable = type === "soldier";
 	const resourceKey = isSoldierTable ? "soldiers" : "duties";
@@ -324,4 +324,6 @@ export function ResourceTable({ type }) {
 			<FeedbackSnackbar handleShowToast={setShowToast} showToast={showToast} />
 		</>
 	);
-}
+};
+
+export { ResourceTable };

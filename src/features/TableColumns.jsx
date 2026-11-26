@@ -60,7 +60,7 @@ const LabelByChips = ({ info }) => {
 	);
 };
 
-function ShowHistory({ info }) {
+const ShowHistory = ({ info }) => {
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -90,7 +90,7 @@ function ShowHistory({ info }) {
 			</Dialog>
 		</>
 	);
-}
+};
 
 export const dutiesColumns = [
 	{

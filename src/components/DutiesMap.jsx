@@ -22,7 +22,7 @@ import View from "ol/View.js";
 import { useEffect, useRef, useState } from "react";
 import { fetchAllDuties } from "../api/duties";
 
-export default function DutiesMap() {
+const DutiesMap = () => {
 	const mapElementRef = useRef(null);
 	const mapRef = useRef(null);
 	const locationsSourceRef = useRef(null);
@@ -225,4 +225,6 @@ export default function DutiesMap() {
 			</div>
 		</Box>
 	);
-}
+};
+
+export default DutiesMap;
