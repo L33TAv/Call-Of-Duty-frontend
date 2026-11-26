@@ -4,7 +4,7 @@ import { useState } from "react";
 import FeedbackSnackbar from "./FeedbackSnackbar";
 import { SoldierFormDialog } from "./FormDialog";
 
-export default function AddSoldierButton() {
+const AddSoldierButton = () => {
 	const [open, setOpen] = useState(false);
 	const [showToast, setShowToast] = useState({ open: false });
 
@@ -35,4 +35,6 @@ export default function AddSoldierButton() {
 			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
 		</>
 	);
-}
+};
+
+export default AddSoldierButton;

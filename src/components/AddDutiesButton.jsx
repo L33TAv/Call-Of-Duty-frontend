@@ -4,7 +4,7 @@ import { useState } from "react";
 import FeedbackSnackbar from "./FeedbackSnackbar";
 import { DutyFormDialog } from "./FormDialog";
 
-export default function AddDutiesButton() {
+const AddDutiesButton = () => {
 	const [open, setOpen] = useState(false);
 	const [showToast, setShowToast] = useState({ open: false });
 
@@ -35,4 +35,6 @@ export default function AddDutiesButton() {
 			<FeedbackSnackbar showToast={showToast} handleShowToast={setShowToast} />
 		</>
 	);
-}
+};
+
+export default AddDutiesButton;

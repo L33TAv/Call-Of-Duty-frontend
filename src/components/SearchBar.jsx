@@ -2,7 +2,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { InputAdornment, TextField } from "@mui/material";
 import { useSearchParams } from "react-router";
 
-export default function SearchBar({ label }) {
+const SearchBar = ({ label }) => {
 	const [Param, setParam] = useSearchParams();
 
 	return (
@@ -31,4 +31,6 @@ export default function SearchBar({ label }) {
 			}}
 		/>
 	);
-}
+};
+
+export default SearchBar;

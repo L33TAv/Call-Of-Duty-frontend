@@ -1,7 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Alert, Snackbar } from "@mui/material";
 
-export default function FeedbackSnackbar({ handleShowToast, showToast }) {
+const FeedbackSnackbar = ({ handleShowToast, showToast }) => {
 	return (
 		<Snackbar
 			open={showToast.open}
@@ -22,4 +22,6 @@ export default function FeedbackSnackbar({ handleShowToast, showToast }) {
 			</Alert>
 		</Snackbar>
 	);
-}
+};
+
+export default FeedbackSnackbar;

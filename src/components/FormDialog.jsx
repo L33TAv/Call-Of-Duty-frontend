@@ -55,13 +55,13 @@ const toDateTimeLocal = (isoString) => {
 	return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 };
 
-export function SoldierFormDialog({
+const SoldierFormDialog = ({
 	open,
 	soldier,
 	setShowToast,
 	setSoldier,
 	setOpen,
-}) {
+}) => {
 	const isEdit = Boolean(soldier?._id);
 
 	const {
@@ -260,9 +260,9 @@ export function SoldierFormDialog({
 			</form>
 		</Dialog>
 	);
-}
+};
 
-export function DutyFormDialog({ open, duty, setShowToast, setDuty, setOpen }) {
+const DutyFormDialog = ({ open, duty, setShowToast, setDuty, setOpen }) => {
 	const queryClient = useQueryClient();
 
 	const isEdit = Boolean(duty?._id);
@@ -648,4 +648,6 @@ export function DutyFormDialog({ open, duty, setShowToast, setDuty, setOpen }) {
 			</form>
 		</Dialog>
 	);
-}
+};
+
+export { DutyFormDialog, SoldierFormDialog };

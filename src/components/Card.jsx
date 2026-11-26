@@ -26,7 +26,7 @@ const CARD_SX = {
 	},
 };
 
-export function SoldierCard({ soldier, onSelect }) {
+const SoldierCard = ({ soldier, onSelect }) => {
 	return (
 		<Card
 			variant="outlined"
@@ -96,9 +96,9 @@ export function SoldierCard({ soldier, onSelect }) {
 			</CardContent>
 		</Card>
 	);
-}
+};
 
-export function DutyCard({ duty, onSelect }) {
+const DutyCard = ({ duty, onSelect }) => {
 	return (
 		<Card
 			variant="outlined"
@@ -153,4 +153,6 @@ export function DutyCard({ duty, onSelect }) {
 			</CardContent>
 		</Card>
 	);
-}
+};
+
+export { DutyCard, SoldierCard };
